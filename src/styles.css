@@ -564,15 +564,6 @@ a {
   line-height: 1.65;
 }
 
-.article-cover {
-  width: 100%;
-  border: 1px solid #d7dfdb;
-  border-radius: 8px;
-  aspect-ratio: 16 / 7.5;
-  object-fit: cover;
-  background: #e6ece9;
-}
-
 .article-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

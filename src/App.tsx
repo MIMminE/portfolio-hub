@@ -157,10 +157,6 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
           <p>{project.summary}</p>
         </header>
 
-        {project.coverImage ? (
-          <img className="article-cover" src={project.coverImage} alt={project.coverAlt ?? project.title} />
-        ) : null}
-
         <section className="article-summary">
           <div>
             <span>상태</span>
