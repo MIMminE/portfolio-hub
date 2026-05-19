@@ -52,11 +52,11 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
 
         <dl className="project-facts">
           <div>
-            <dt>Latest</dt>
+            <dt>최근 작업</dt>
             <dd>{status?.latestReleaseTag ?? status?.latestCommitMessage ?? "sync pending"}</dd>
           </div>
           <div>
-            <dt>Updated</dt>
+            <dt>갱신일</dt>
             <dd>{status?.pushedAt ? formatDate(status.pushedAt) : "not synced"}</dd>
           </div>
         </dl>
@@ -68,13 +68,13 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
         </div>
 
         <div className="document-box">
-          <strong>대표 문서</strong>
+          <strong>상세 글</strong>
           <p>{project.entryDocumentPath}</p>
         </div>
 
         {project.localDemo ? (
           <p className="local-demo-note">
-            Local demo: <span>{project.localDemo.label}</span>
+            화면/콘솔: <span>{project.localDemo.label}</span>
           </p>
         ) : null}
 
