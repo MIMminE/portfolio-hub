@@ -13,20 +13,23 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
   const links = [...project.links, ...releaseLink];
 
   return (
-    <article className="project-card">
+    <article className="project-card" id={project.id}>
       {project.coverImage ? (
-        <img className="project-cover" src={project.coverImage} alt={`${project.title} preview`} />
+        <img className="project-cover" src={project.coverImage} alt={project.coverAlt ?? `${project.title} preview`} />
       ) : (
         <div className="project-cover project-cover-empty">{project.title}</div>
       )}
 
       <div className="project-body">
+        <div className="project-meta">
+          <span>{project.category}</span>
+          <span className={`status-pill ${statusClass(project.status)}`}>{project.status}</span>
+        </div>
         <div className="project-title-row">
           <div>
             <p className="project-subtitle">{project.subtitle}</p>
             <h4>{project.title}</h4>
           </div>
-          <span className={`status-pill ${statusClass(project.status)}`}>{project.status}</span>
         </div>
 
         <p className="project-description">{project.description}</p>
@@ -43,10 +46,21 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
         </dl>
 
         <div className="stack-list" aria-label={`${project.title} tech stack`}>
-          {project.stacks.slice(0, 5).map((stack) => (
+          {project.stacks.slice(0, 6).map((stack) => (
             <span key={stack}>{stack}</span>
           ))}
         </div>
+
+        <div className="impact-box">
+          <strong>Portfolio Point</strong>
+          <p>{project.impact}</p>
+        </div>
+
+        {project.localDemo ? (
+          <p className="local-demo-note">
+            Local demo: <span>{project.localDemo.label}</span>
+          </p>
+        ) : null}
 
         <details className="project-detail">
           <summary>핵심 설계 보기</summary>
@@ -66,7 +80,7 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
 
         <div className="link-row">
           {links.map((link) => (
-            <a key={`${link.type}-${link.label}`} href={link.url} target="_blank" rel="noreferrer">
+            <a className={`link-${link.type}`} key={`${link.type}-${link.label}`} href={link.url} target="_blank" rel="noreferrer">
               {link.label}
             </a>
           ))}

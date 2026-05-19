@@ -47,6 +47,9 @@
 ## 허브 운영 메모
 
 - 각 프로젝트의 최신 커밋/릴리즈 정보는 `pnpm sync:github`로 갱신한다.
+- 각 프로젝트의 공개 설명, 대표 이미지, 문서 링크는 해당 레포의 `.portfolio/project.json`에서 관리한다.
+- 상태와 manifest를 함께 갱신하려면 `pnpm sync:all`을 실행한다.
 - 프로젝트 설명 문구는 `src/data/projects.ts`에서 수동 관리한다.
+- 동기화된 프로젝트 설명은 `src/data/generated-projects.json`에 생성되며, 허브 화면은 이 데이터를 우선 사용한다.
 - GitHub Release가 있는 프로젝트는 허브 카드에 릴리즈 링크가 자동 노출된다.
 - 로컬 시연 포트가 겹칠 경우 Maternity Client는 `5175`로 띄운다.

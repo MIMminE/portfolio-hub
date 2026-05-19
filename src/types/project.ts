@@ -11,6 +11,11 @@ export interface ProjectLink {
   type: "github" | "docs" | "release" | "manual" | "demo";
 }
 
+export interface ProjectLocalDemo {
+  label: string;
+  url: string;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -26,6 +31,8 @@ export interface Project {
   highlights: string[];
   interviewPoints: string[];
   coverImage?: string;
+  coverAlt?: string;
+  localDemo?: ProjectLocalDemo;
   links: ProjectLink[];
 }
 

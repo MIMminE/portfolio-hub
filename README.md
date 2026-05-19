@@ -31,10 +31,13 @@ pnpm build
 
 `src/data/projects.ts`는 사람이 작성하는 소개/강점/문서 링크를 관리합니다.
 `src/data/generated-status.json`은 GitHub API로 동기화되는 최신 커밋, 릴리즈, 업데이트 정보를 담습니다.
+`src/data/generated-projects.json`은 각 프로젝트 레포의 `.portfolio/project.json`에서 수집한 공개 포트폴리오 설명을 담습니다.
 
 ```bash
-pnpm sync:github
+pnpm sync:all
 ```
+
+각 프로젝트를 업데이트할 때 `.portfolio/project.json`도 함께 갱신하면, 허브가 다음 동기화에서 제목, 설명, 문서 링크, 대표 이미지를 자동으로 반영합니다.
 
 ## Portfolio Review
 

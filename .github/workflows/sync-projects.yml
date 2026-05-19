@@ -30,8 +30,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Sync GitHub project status
-        run: pnpm sync:github
+      - name: Sync GitHub project status and manifests
+        run: pnpm sync:all
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -39,4 +39,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore(sync): 프로젝트 상태 자동 갱신"
-          file_pattern: src/data/generated-status.json
+          file_pattern: src/data/generated-status.json src/data/generated-projects.json
