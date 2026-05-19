@@ -181,18 +181,6 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
 
   return (
     <main className="article-shell">
-      <FloatingTools
-        toc={
-          tocHeadings.length > 0
-            ? {
-                activeHeadingId,
-                headings: tocHeadings,
-                onSelect: moveToHeading
-              }
-            : undefined
-        }
-      />
-
       <nav className="top-nav article-nav" aria-label="Project article navigation">
         <a className="brand-mark" href="/">
           Engineering Portfolio
@@ -252,9 +240,27 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
           </div>
         </header>
 
-        <section className="markdown-card">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.entryDocumentMarkdown}</ReactMarkdown>
-        </section>
+        <div className="article-content-layout">
+          <section className="markdown-card">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.entryDocumentMarkdown}</ReactMarkdown>
+          </section>
+
+          <aside className="article-sidebar" aria-label="Project article sidebar">
+            <section className="article-sidebar-card">
+              <DeveloperProfilePanel />
+            </section>
+            {tocHeadings.length > 0 ? (
+              <section className="article-sidebar-card toc-sidebar-card">
+                <h2>목차</h2>
+                <FloatingTocPanel
+                  activeHeadingId={activeHeadingId}
+                  headings={tocHeadings}
+                  onSelect={moveToHeading}
+                />
+              </section>
+            ) : null}
+          </aside>
+        </div>
       </article>
     </main>
   );
