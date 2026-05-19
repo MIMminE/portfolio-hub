@@ -6,27 +6,17 @@ import generatedProjects from "./data/generated-projects.json";
 import { projects } from "./data/projects";
 import { loadPortfolioFeed } from "./data/loadPortfolioFeed";
 import { ProjectCard } from "./components/ProjectCard";
-import type { GeneratedProjectStatus, Project, ProjectCategory } from "./types/project";
+import type { GeneratedProjectStatus, Project } from "./types/project";
 
 const statuses = generatedStatuses as GeneratedProjectStatus[];
 const syncedProjects = generatedProjects as Project[];
 
 const fallbackProjects = syncedProjects.length > 0 ? syncedProjects : projects;
 
-const categoryDescriptions: Record<ProjectCategory, string> = {
-  "실무 도메인형": "운영 조직, 업무 흐름, 화면 사용성을 함께 설계한 프로젝트",
-  "백엔드 아키텍처형": "서비스 신뢰성, 이벤트 흐름, 배포 구조를 다룬 프로젝트",
-  "성능/동시성 실험형": "동시성 문제를 실험과 결과로 검증한 프로젝트"
-};
-
 export function App() {
   const [displayProjects, setDisplayProjects] = useState<Project[]>(fallbackProjects);
   const [feedError, setFeedError] = useState<string | null>(null);
   const statusByProject = new Map(statuses.map((status) => [status.id, status]));
-  const categories = useMemo(
-    () => Array.from(new Set(displayProjects.map((project) => project.category))) as ProjectCategory[],
-    [displayProjects]
-  );
   const selectedProjectId = new URLSearchParams(window.location.search).get("project");
   const selectedProject = displayProjects.find((project) => project.id === selectedProjectId);
 
@@ -83,26 +73,14 @@ export function App() {
           </div>
         </div>
 
-        {categories.map((category) => {
-          const categoryProjects = displayProjects.filter((project) => project.category === category);
-
-          return (
-            <section className="category-section" key={category}>
-              <div className="category-heading">
-                <h3>{category}</h3>
-                <p>{categoryDescriptions[category]}</p>
-              </div>
-              <div className="project-grid">
-                {categoryProjects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                  />
-                ))}
-              </div>
-            </section>
-          );
-        })}
+        <div className="project-grid">
+          {displayProjects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+            />
+          ))}
+        </div>
       </section>
 
     </main>

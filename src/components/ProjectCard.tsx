@@ -31,9 +31,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
       )}
 
       <div className="project-body">
-        <div className="project-meta">
-          <span>{project.category}</span>
-        </div>
         <div className="project-title-row">
           <div>
             <p className="project-subtitle">{project.subtitle}</p>
