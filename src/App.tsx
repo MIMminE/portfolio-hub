@@ -81,7 +81,6 @@ export function App() {
             <p className="eyebrow">Selected Work</p>
             <h2>프로젝트</h2>
           </div>
-          <p>카드를 선택하면 기능 설명, 화면 캡처, 설계 문서를 하나의 글처럼 볼 수 있습니다.</p>
         </div>
 
         {categories.map((category) => {
@@ -172,13 +171,10 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
   return (
     <main className="article-shell">
       <nav className="top-nav article-nav" aria-label="Project article navigation">
-        <div className="article-nav-title">
-          <a className="brand-mark" href="/">
-            Engineering Portfolio
-          </a>
-          <span>{project.title}</span>
-        </div>
         <div>
+          <a href="/" target="_self">
+            메인
+          </a>
           <a href="https://github.com/MIMminE" target="_blank" rel="noreferrer">
             Profile
           </a>
