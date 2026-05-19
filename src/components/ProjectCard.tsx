@@ -33,7 +33,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <div className="project-body">
         <div className="project-meta">
           <span>{project.category}</span>
-          <span className={`status-pill ${statusClass(project.status)}`}>{project.status}</span>
         </div>
         <div className="project-title-row">
           <div>
@@ -52,16 +51,4 @@ export function ProjectCard({ project }: ProjectCardProps) {
       </div>
     </article>
   );
-}
-
-function statusClass(status: Project["status"]) {
-  if (status === "Portfolio Ready") {
-    return "status-ready";
-  }
-
-  if (status === "In Progress") {
-    return "status-progress";
-  }
-
-  return "status-cleanup";
 }
