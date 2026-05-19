@@ -1,17 +1,35 @@
-# Portfolio Package Spec
+# Portfolio Package Upload Spec
 
-이 문서는 Portfolio Hub가 S3 같은 정적 스토리지에서 프로젝트 게시물을 읽기 위한 패키지 규격을 정의한다.
+이 문서는 Portfolio Hub가 S3 같은 정적 스토리지에서 프로젝트 게시물을 읽기 위한 업로드 규격을 정의한다.
 
-핵심 원칙은 단순하다.
+현재 허브는 프로젝트 레포를 직접 분석하지 않는다. 각 프로젝트가 정해진 패키지를 업로드하면, 허브는 그 패키지를 읽어 메인 목록과 상세 블로그를 렌더링한다.
 
-- 허브는 각 프로젝트 레포의 README나 docs를 직접 해석하지 않는다.
-- 각 프로젝트는 정해진 형태의 정적 패키지를 만든다.
-- 허브는 `index.json` -> `manifest.json` -> `article.md` 순서로 읽는다.
-- 실제 본문은 `article.md`이고, `manifest.json`은 카드와 상세 화면을 위한 메타데이터다.
+## Rendering Model
 
-## Storage Layout
+허브 화면은 아래 입력을 사용한다.
 
-S3 또는 로컬 mock bucket은 아래 구조를 따른다.
+| UI Area | Source |
+| --- | --- |
+| 메인 케이스 스터디 목록 제목 | `manifest.title` |
+| 메인 케이스 스터디 목록 맥락 | `manifest.subtitle` |
+| 메인 케이스 스터디 목록 접근 | `manifest.summary` |
+| 메인 목록 이미지 | `manifest.coverImage` |
+| 메인/상세 기술 스택 | `manifest.stacks` |
+| 상세 상단 제목 | `manifest.title` |
+| 상세 상단 설명 | `manifest.summary` |
+| 상세 본문 | `manifest.article`이 가리키는 Markdown 파일 |
+| 상세 목차 | `article.md`의 `#`, `##`, `###` |
+| 상세 릴리즈 다운로드 | GitHub Release 동기화 값 또는 `links[].type = "release"` |
+
+중요한 구분:
+
+- `manifest.json`은 게시물 메타데이터다.
+- `article.md`가 실제 블로그 본문이다.
+- `links`는 본문이 아니라 외부 링크 또는 다운로드 링크다.
+
+## S3 Layout
+
+S3에는 아래 구조로 업로드한다.
 
 ```text
 portfolio-feed/
@@ -19,48 +37,46 @@ portfolio-feed/
 ├─ warehouse-ops-suite/
 │  ├─ manifest.json
 │  ├─ article.md
-│  └─ images/
-│     ├─ cover.png
-│     └─ dashboard.png
+│  ├─ images/
+│  │  ├─ cover.png
+│  │  └─ dashboard.png
+│  └─ releases/
+│     └─ warehouse-ops-suite-1.0.0.zip
 └─ maternity-care-commerce/
    ├─ manifest.json
    ├─ article.md
-   └─ images/
-      ├─ cover.png
-      ├─ admin-dashboard.png
-      └─ client-home.png
+   ├─ images/
+   │  ├─ cover.png
+   │  └─ admin-dashboard.png
+   └─ releases/
+      └─ maternity-care-commerce-1.0.0.zip
 ```
 
-현재 로컬 검증용 mock bucket은 `public/portfolio-feed`에 둔다.
+`releases/`는 선택이다. 설치 파일, 데모 빌드, PDF 묶음처럼 다운로드 가능한 산출물이 있을 때만 둔다.
+
+현재 로컬 검증용 mock bucket은 `public/portfolio-feed`다.
 
 ## Loading Flow
 
-허브는 아래 순서로 데이터를 읽는다.
+허브는 아래 순서로 읽는다.
 
 ```text
-1. VITE_PORTFOLIO_FEED_URL 또는 /portfolio-feed/index.json fetch
+1. /portfolio-feed/index.json 또는 VITE_PORTFOLIO_FEED_URL fetch
 2. index.json.projects[*].manifestUrl fetch
 3. manifest.json.article fetch
-4. manifest + article.md를 조합해 카드와 상세 게시물 렌더링
+4. manifest + article.md + release metadata로 화면 렌더링
 ```
 
-본문에 들어가는 이미지와 내부 링크가 상대 경로이면, 허브는 `article.md` 위치 기준의 절대 URL로 변환한다.
+상대 경로 규칙:
 
-예:
-
-```md
-![대시보드](./images/dashboard.png)
-```
-
-`portfolio-feed/warehouse-ops-suite/article.md` 안에서 위처럼 쓰면 최종적으로 아래 파일을 가리킨다.
-
-```text
-portfolio-feed/warehouse-ops-suite/images/dashboard.png
-```
+- `index.json.projects[].manifestUrl`은 `index.json` 위치 기준이다.
+- `manifest.article`과 `manifest.coverImage`는 `manifest.json` 위치 기준이다.
+- `article.md` 안의 상대 이미지와 상대 링크는 `article.md` 위치 기준이다.
+- `links[].url`은 절대 URL 또는 `manifest.json` 위치 기준 상대 경로를 권장한다.
 
 ## index.json
 
-`index.json`은 허브가 처음 읽는 목록 파일이다. 전체 프로젝트 목록과 각 프로젝트 패키지의 `manifest.json` 위치만 가진다.
+허브가 처음 읽는 feed 목록 파일이다.
 
 ```json
 {
@@ -70,16 +86,10 @@ portfolio-feed/warehouse-ops-suite/images/dashboard.png
     {
       "id": "warehouse-ops-suite",
       "manifestUrl": "./warehouse-ops-suite/manifest.json"
-    },
-    {
-      "id": "maternity-care-commerce",
-      "manifestUrl": "./maternity-care-commerce/manifest.json"
     }
   ]
 }
 ```
-
-### Fields
 
 | Field | Required | Description |
 | --- | --- | --- |
@@ -89,11 +99,9 @@ portfolio-feed/warehouse-ops-suite/images/dashboard.png
 | `projects[].id` | yes | 프로젝트 고유 ID |
 | `projects[].manifestUrl` | yes | 해당 프로젝트의 `manifest.json` 경로 |
 
-`manifestUrl`은 `index.json` 위치 기준 상대 경로 또는 절대 URL을 사용할 수 있다.
-
 ## manifest.json
 
-`manifest.json`은 카드와 상세 화면의 메타데이터다. 본문 자체를 담지 않는다.
+프로젝트 패키지의 중심 메타데이터다.
 
 ```json
 {
@@ -108,7 +116,14 @@ portfolio-feed/warehouse-ops-suite/images/dashboard.png
   "article": "./article.md",
   "coverImage": "./images/cover.png",
   "coverAlt": "Warehouse Ops Suite 운영 현황 대시보드",
-  "updatedAt": "2026-05-19T00:00:00.000Z"
+  "updatedAt": "2026-05-19T00:00:00.000Z",
+  "links": [
+    {
+      "label": "v1.0.0 demo package",
+      "url": "./releases/warehouse-ops-suite-1.0.0.zip",
+      "type": "release"
+    }
+  ]
 }
 ```
 
@@ -117,49 +132,58 @@ portfolio-feed/warehouse-ops-suite/images/dashboard.png
 | Field | Used In UI | Description |
 | --- | --- | --- |
 | `id` | routing | URL query와 index 매칭에 사용하는 프로젝트 ID |
-| `title` | main card, detail header | 프로젝트/게시물 제목 |
-| `subtitle` | main card | 글 목록에서 제목 위에 보이는 짧은 설명 |
-| `summary` | main card, detail header | 프로젝트 요약 문장 |
-| `stacks` | main card, detail sidebar | 기술 스택 chip 목록 |
-| `repoUrl` | detail nav | GitHub 링크 생성에 사용 |
+| `title` | main/detail | 프로젝트 제목 |
+| `subtitle` | main | 케이스 스터디의 `맥락` |
+| `summary` | main/detail | 케이스 스터디의 `접근`, 상세 상단 설명 |
+| `stacks` | main/detail sidebar | 기술 스택 chip 목록 |
+| `repoUrl` | detail nav | GitHub 버튼 URL |
 | `article` | detail body | 실제 본문 Markdown 파일 경로 |
 
-### Current Compatibility Fields
+### Compatibility Fields
 
-아래 필드는 현재 타입과 기존 패키지 호환을 위해 유지한다.
+아래 필드는 기존 패키지 호환 때문에 유지한다.
 
-| Field | Current Use | Note |
-| --- | --- | --- |
-| `category` | detail header eyebrow | 메인 목록에서는 사용하지 않음 |
-| `status` | detail header metadata | 메인 목록에서는 사용하지 않음 |
+| Field | Current Use |
+| --- | --- |
+| `category` | 현재 메인/상세 UI에서는 노출하지 않음 |
+| `status` | 상세 상단 metadata에 표시 |
 
 ### Optional Fields
 
-| Field | Used In UI | Description |
+| Field | Current Use | Description |
 | --- | --- | --- |
-| `coverImage` | main card | 대표 이미지. 상대 경로 또는 절대 URL 가능 |
-| `coverAlt` | main card image alt | 대표 이미지 대체 텍스트 |
-| `updatedAt` | detail header | 최근 업데이트 표시용 ISO string |
-| `localDemo` | reserved | 로컬 데모 링크. 현재 UI에서는 직접 노출하지 않음 |
-| `links` | reserved | README, 문서, 릴리즈 같은 외부 링크. 현재 상세 사이드바에서는 노출하지 않음 |
+| `coverImage` | main image | 대표 이미지 |
+| `coverAlt` | main image alt | 대표 이미지 대체 텍스트 |
+| `updatedAt` | detail metadata | 최근 업데이트 표시용 ISO string |
+| `localDemo` | reserved | 로컬 데모 링크 |
+| `links` | release fallback | 외부 링크, 문서 링크, 릴리즈 다운로드 링크 |
+
+## Main List Rules
+
+메인 화면은 프로젝트를 분류하지 않고 하나의 케이스 스터디 목록으로 보여준다.
+
+각 row는 아래처럼 해석된다.
+
+```text
+01. {title}
+맥락: {subtitle}
+접근: {summary}
+기술: {stacks}
+```
+
+`coverImage`는 row 왼쪽 썸네일로 표시된다. 허브는 썸네일 높이를 고정해서 이미지 원본 비율 때문에 row 높이가 달라지지 않도록 한다.
+
+권장:
+
+- `title`: 20자 안팎
+- `subtitle`: 한 줄 설명
+- `summary`: 한 문장, 너무 길면 읽기 어려움
+- `stacks`: 4~8개
+- `coverImage`: 화면 캡처 또는 실제 산출물 이미지
 
 ## article.md
 
-`article.md`가 실제 블로그 본문이다. `links`가 본문이 아니다.
-
-허브는 `article.md`를 Markdown으로 렌더링한다.
-
-지원하는 주요 문법:
-
-- `#`, `##`, `###` heading
-- paragraph
-- unordered/ordered list
-- fenced code block
-- table, GFM
-- image
-- link
-
-예시:
+`article.md`가 실제 상세 블로그 본문이다.
 
 ```md
 # Warehouse Ops Suite
@@ -174,29 +198,39 @@ portfolio-feed/warehouse-ops-suite/images/dashboard.png
 | --- | --- |
 | 입고 | PDA 검수 후 로케이션 적치 |
 | 출고 | 출고 지시 접수 후 피킹 웨이브 생성 |
-
-## 설계 포인트
-
-- 관리자 웹, PDA 앱, 로컬 에이전트를 분리했다.
-- HTTP와 WebSocket으로 실행 단위 간 통신을 구성했다.
 ```
+
+지원 문법:
+
+- `#`, `##`, `###`
+- paragraph
+- list
+- fenced code block
+- GFM table
+- image
+- link
 
 ### Heading Rules
 
-상세 페이지 우측 목차는 `article.md`의 heading에서 자동 생성된다.
+상세 우측 목차는 `#`, `##`, `###`에서 자동 생성한다.
 
-| Markdown | Used In TOC |
-| --- | --- |
-| `#` | yes |
-| `##` | yes |
-| `###` | yes |
-| `####` 이하 | no |
+첫 번째 본문 H1이 `manifest.title`과 같거나 `manifest.title`로 시작하면 허브가 자동으로 제거한다. 상세 상단에 이미 제목이 있기 때문이다.
 
-본문 첫 heading은 보통 프로젝트 제목으로 둔다.
+예:
 
 ```md
-# Maternity Care Commerce
+# Warehouse Ops Suite
 ```
+
+또는
+
+```md
+# Warehouse Ops Suite 이력서용 포트폴리오
+```
+
+위 두 경우는 상세 본문과 목차에서 제거된다.
+
+본문은 바로 `## 프로젝트 한 줄 소개`처럼 시작해도 된다.
 
 ### Image Rules
 
@@ -206,41 +240,81 @@ portfolio-feed/warehouse-ops-suite/images/dashboard.png
 ![관리자 대시보드](./images/admin-dashboard.png)
 ```
 
-권장 규칙:
+권장:
 
 - 본문 이미지는 `images/` 아래에 둔다.
-- 이미지 파일명은 소문자 kebab-case를 사용한다.
-- 화면 캡처 이미지는 넓은 화면 기준 1200px 안팎을 권장한다.
-- 민감 정보, 실제 고객사명, 실제 운영 데이터는 제거한다.
+- 파일명은 소문자 kebab-case를 사용한다.
+- 화면 캡처는 민감 정보와 실제 고객사 데이터를 제거한다.
+- 외부 이미지 URL도 가능하지만, 장기 보존을 위해 S3 패키지 내부 업로드를 권장한다.
 
-외부 이미지 URL도 가능하지만, 장기적으로는 S3 패키지 안에 복사해 두는 것을 권장한다.
+## Release Download Rules
 
-## links Field
+상세 게시물에서 다운로드 버튼을 보여주는 방법은 두 가지다.
 
-`links`는 본문이 아니라 외부 참고 링크 목록이다.
+### 1. GitHub Release 기반
+
+허브의 GitHub 상태 동기화가 `latestReleaseUrl`을 가져오면, 해당 URL을 우선 사용한다.
+
+이 방식은 별도 manifest 설정 없이 GitHub Releases를 기준으로 동작한다.
+
+### 2. manifest links 기반
+
+S3에 직접 산출물을 올리고 싶으면 `links`에 `type: "release"`를 넣는다.
 
 ```json
 {
   "links": [
     {
-      "label": "README",
-      "url": "https://github.com/MIMminE/warehouse-ops-suite/blob/main/README.md",
-      "type": "docs"
+      "label": "v1.0.0 macOS build",
+      "url": "./releases/warehouse-ops-suite-1.0.0.dmg",
+      "type": "release"
     }
   ]
 }
 ```
 
-현재 UI에서는 상세 사이드바의 문서 링크를 제거했기 때문에 `links`를 직접 노출하지 않는다.
+허브는 GitHub Release URL이 없을 때 `links` 중 첫 번째 `release` 링크를 다운로드 버튼으로 사용한다.
 
-다만 추후 아래 기능을 붙일 수 있도록 필드는 예약해 둔다.
+릴리즈 파일 권장 위치:
 
-- 릴리즈 파일 다운로드
-- GitHub README 링크
-- 배포 데모 링크
-- PDF 보고서 링크
+```text
+portfolio-feed/{projectId}/releases/
+```
 
-## S3 Upload Contract
+권장 파일명:
+
+```text
+{projectId}-{version}.{ext}
+```
+
+예:
+
+```text
+warehouse-ops-suite-1.0.0.zip
+print-agent-0.1.0.dmg
+pda-app-0.1.0.apk
+```
+
+## links Field
+
+`links`는 본문이 아니다.
+
+현재 UI에서 직접 쓰는 링크 타입:
+
+| Type | Current Behavior |
+| --- | --- |
+| `release` | GitHub Release가 없을 때 상세 사이드바 다운로드 버튼으로 사용 |
+
+예약된 링크 타입:
+
+| Type | Note |
+| --- | --- |
+| `docs` | README, 보고서, API 문서 |
+| `manual` | 사용자 매뉴얼 |
+| `demo` | 배포 데모 |
+| `github` | 허브가 `repoUrl`로 자동 생성하므로 manifest에 직접 넣을 필요 없음 |
+
+## Upload Contract
 
 각 프로젝트 레포 CI는 자기 프로젝트 패키지만 업로드한다.
 
@@ -248,19 +322,15 @@ portfolio-feed/warehouse-ops-suite/images/dashboard.png
 s3://{PORTFOLIO_FEED_BUCKET}/portfolio-feed/{projectId}/
 ├─ manifest.json
 ├─ article.md
-└─ images/
+├─ images/
+│  └─ ...
+└─ releases/
    └─ ...
 ```
 
 각 프로젝트 CI는 `portfolio-feed/index.json`을 직접 수정하지 않는다.
 
 전체 index는 Portfolio Hub 레포가 관리한다.
-
-```text
-portfolio-hub
-├─ config/portfolio-feed-projects.json
-└─ scripts/build-portfolio-feed-index.ts
-```
 
 ## Hub-Owned Index
 
@@ -303,13 +373,13 @@ public/portfolio-feed/
 └─ ...
 ```
 
-허브의 기본 feed URL은 아래와 같다.
+기본 feed URL:
 
 ```text
 /portfolio-feed/index.json
 ```
 
-AWS 연결 후에는 `.env` 또는 배포 환경변수에 아래 값을 넣는다.
+AWS 연결 후:
 
 ```text
 VITE_PORTFOLIO_FEED_URL=https://portfolio.example.com/portfolio-feed/index.json
@@ -317,12 +387,13 @@ VITE_PORTFOLIO_FEED_URL=https://portfolio.example.com/portfolio-feed/index.json
 
 ## Validation Checklist
 
-각 프로젝트 패키지는 업로드 전 아래를 확인한다.
+업로드 전 아래를 확인한다.
 
-- `index.json`의 `manifestUrl`이 실제 존재한다.
+- `index.json.projects[].manifestUrl`이 실제 존재한다.
 - `manifest.json.article`이 실제 존재한다.
 - `coverImage`가 있으면 이미지가 실제 존재한다.
 - `article.md` 내부 상대 이미지 경로가 실제 존재한다.
+- `links[].type = "release"`를 쓰는 경우 release 파일이 실제 존재한다.
 - `title`, `subtitle`, `summary`가 너무 길지 않다.
 - `stacks`는 4~8개 정도로 제한한다.
 - 본문 heading은 `#`, `##`, `###` 중심으로 작성한다.

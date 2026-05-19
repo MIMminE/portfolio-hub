@@ -47,8 +47,6 @@ export function App() {
 
   return (
     <main className="app-shell">
-      <FloatingTools />
-
       <nav className="top-nav" aria-label="Portfolio navigation">
         <a className="brand-mark" href="#">
           Engineering Portfolio
@@ -65,6 +63,36 @@ export function App() {
         {feedError ? (
           <p className="feed-warning">포트폴리오 패키지를 불러오지 못해 빌드 시점 데이터를 표시합니다.</p>
         ) : null}
+
+        <section className="home-overview" aria-label="Portfolio hub overview">
+          <div className="hub-flow-card">
+            <p className="eyebrow">Engineering Portfolio</p>
+            <h1>실무 프로젝트를 글처럼 읽을 수 있게 정리했습니다</h1>
+            <p>
+              각 게시물은 실제 프로젝트의 화면, 기능 흐름, 설계 문서를 함께 묶어
+              구현 결과와 문제 해결 방식을 한 번에 볼 수 있도록 구성했습니다.
+            </p>
+            <div className="home-reading-guide" aria-label="Portfolio reading guide">
+              <div>
+                <strong>1. 프로젝트 선택</strong>
+                <span>관심 있는 시스템을 고르면 상세 게시물로 이동합니다.</span>
+              </div>
+              <div>
+                <strong>2. 화면과 흐름 확인</strong>
+                <span>관리자 화면, 기능 설명, 설계 의도를 함께 읽습니다.</span>
+              </div>
+              <div>
+                <strong>3. 문서와 릴리즈 확인</strong>
+                <span>필요한 경우 설계 문서와 다운로드 가능한 릴리즈를 함께 제공합니다.</span>
+              </div>
+            </div>
+            <p className="hub-sync-note">
+              프로젝트별 <code>manifest</code>, Markdown, 이미지, 릴리즈 파일은 S3 패키지 구조로 동기화됩니다.
+            </p>
+          </div>
+
+          <DeveloperProfileSummary />
+        </section>
 
         <div className="section-heading">
           <div>
@@ -87,8 +115,28 @@ export function App() {
   );
 }
 
+function DeveloperProfileSummary() {
+  return (
+    <aside className="home-profile-card" aria-label="Developer profile summary">
+      <p className="profile-kicker">Developer</p>
+      <h2>서동원</h2>
+      <p className="home-profile-role">Backend / Full-stack Developer</p>
+      <p>
+        물류 WMS, 백오피스, 커머스 운영 시스템처럼 실제 업무 흐름이 복잡한 도메인을
+        API, 데이터 모델, 관리자 화면으로 정리하는 데 집중합니다.
+      </p>
+      <a href="https://github.com/MIMminE" target="_blank" rel="noreferrer">
+        GitHub
+      </a>
+    </aside>
+  );
+}
+
 function ProjectArticle({ project, status }: { project: Project; status?: GeneratedProjectStatus }) {
   const updatedAt = status?.pushedAt ?? project.syncedFromManifestAt;
+  const manifestReleaseLink = project.links.find((link) => link.type === "release");
+  const releaseUrl = status?.latestReleaseUrl ?? manifestReleaseLink?.url;
+  const releaseLabel = status?.latestReleaseName ?? status?.latestReleaseTag ?? manifestReleaseLink?.label;
   const articleMarkdown = useMemo(
     () => removeDuplicateTitleHeading(project.entryDocumentMarkdown, project.title),
     [project.entryDocumentMarkdown, project.title]
@@ -202,6 +250,15 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
                 </div>
               </div>
             </section>
+            {releaseUrl ? (
+              <section className="article-sidebar-card release-card" aria-label="Project release download">
+                <h2>릴리즈</h2>
+                <p>{releaseLabel ?? "Latest Release"}</p>
+                <a href={releaseUrl} target="_blank" rel="noreferrer">
+                  릴리즈 다운로드
+                </a>
+              </section>
+            ) : null}
             {tocHeadings.length > 0 ? (
               <section className="article-sidebar-card toc-sidebar-card">
                 <FloatingTocPanel

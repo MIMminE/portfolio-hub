@@ -12,6 +12,8 @@ project-repo/
 │  ├─ resume-portfolio.md
 │  └─ assets/
 │     └─ portfolio/
+├─ releases/
+│  └─ warehouse-ops-suite-1.0.0.zip
 └─ .github/
    └─ workflows/
       └─ publish-portfolio-package.yml
@@ -36,9 +38,9 @@ project-repo/
   "coverAlt": "운영 현황 대시보드",
   "links": [
     {
-      "label": "제품 매뉴얼",
-      "url": "https://github.com/MIMminE/warehouse-ops-suite/blob/main/docs/product-manual.md",
-      "type": "manual"
+      "label": "v1.0.0 demo package",
+      "url": "releases/warehouse-ops-suite-1.0.0.zip",
+      "type": "release"
     }
   ]
 }
@@ -52,15 +54,23 @@ CI는 위 manifest를 S3용 패키지로 변환해 아래 위치에 업로드한
 s3://{PORTFOLIO_FEED_BUCKET}/portfolio-feed/{projectId}/
 ├─ manifest.json
 ├─ article.md
-└─ images/
+├─ images/
+└─ releases/
 ```
 
-업로드 후 manifest의 `article`과 `coverImage`는 패키지 기준 상대 경로가 된다.
+업로드 후 manifest의 `article`, `coverImage`, release 링크는 패키지 기준 상대 경로가 된다.
 
 ```json
 {
   "article": "./article.md",
-  "coverImage": "./images/cover.png"
+  "coverImage": "./images/cover.png",
+  "links": [
+    {
+      "label": "v1.0.0 demo package",
+      "url": "./releases/warehouse-ops-suite-1.0.0.zip",
+      "type": "release"
+    }
+  ]
 }
 ```
 
@@ -102,16 +112,19 @@ jobs:
           const manifest = JSON.parse(fs.readFileSync(".portfolio/manifest.json", "utf8"));
           const outDir = "dist/portfolio-package";
           const imagesDir = path.join(outDir, "images");
+          const releasesDir = path.join(outDir, "releases");
 
           fs.rmSync(outDir, { recursive: true, force: true });
           fs.mkdirSync(imagesDir, { recursive: true });
+          fs.mkdirSync(releasesDir, { recursive: true });
 
           fs.copyFileSync(manifest.article, path.join(outDir, "article.md"));
 
           const packageManifest = {
             ...manifest,
             article: "./article.md",
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
+            links: Array.isArray(manifest.links) ? [...manifest.links] : []
           };
 
           if (manifest.coverImage) {
@@ -120,6 +133,20 @@ jobs:
             fs.copyFileSync(manifest.coverImage, path.join(imagesDir, coverName));
             packageManifest.coverImage = `./images/${coverName}`;
           }
+
+          packageManifest.links = packageManifest.links.map((link) => {
+            if (link.type !== "release" || /^https?:\/\//.test(link.url)) {
+              return link;
+            }
+
+            const releaseName = path.basename(link.url);
+            fs.copyFileSync(link.url, path.join(releasesDir, releaseName));
+
+            return {
+              ...link,
+              url: `./releases/${releaseName}`
+            };
+          });
 
           fs.writeFileSync(
             path.join(outDir, "manifest.json"),
