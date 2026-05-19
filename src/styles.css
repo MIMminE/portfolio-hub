@@ -79,32 +79,6 @@ a {
   text-transform: uppercase;
 }
 
-.page-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(260px, 0.55fr);
-  gap: 24px;
-  align-items: end;
-  padding: 28px 0 16px;
-}
-
-.page-intro h1 {
-  max-width: 760px;
-  margin: 0;
-  font-size: clamp(28px, 4vw, 46px);
-  line-height: 1.16;
-  letter-spacing: 0;
-  color: #f7fffb;
-}
-
-.page-intro > p {
-  max-width: 420px;
-  margin: 0;
-  color: #b5c7c0;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.7;
-}
-
 .primary-link,
 .secondary-link {
   display: inline-flex;
@@ -126,53 +100,6 @@ a {
   border: 1px solid rgba(197, 222, 213, 0.22);
   background: rgba(255, 255, 255, 0.06);
   color: #eef5f1;
-}
-
-.hero-panel {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.hero-panel div {
-  border: 1px solid rgba(197, 222, 213, 0.16);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  padding: 13px 14px;
-}
-
-.hero-panel strong {
-  display: block;
-  font-size: 19px;
-  line-height: 1;
-}
-
-.hero-panel span {
-  display: block;
-  margin-top: 6px;
-  color: #9eb2ab;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.focus-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-  border-block: 1px solid rgba(197, 222, 213, 0.16);
-  padding: 10px 0;
-}
-
-.focus-strip span {
-  border-radius: 999px;
-  border: 1px solid rgba(118, 217, 183, 0.18);
-  background: rgba(118, 217, 183, 0.08);
-  padding: 7px 11px;
-  color: #d7ebe4;
-  font-size: 13px;
-  font-weight: 900;
 }
 
 .featured-section,
@@ -227,7 +154,7 @@ a {
 }
 
 .projects-section {
-  margin-top: 26px;
+  margin-top: 28px;
 }
 
 .section-heading {
@@ -711,17 +638,12 @@ a {
 
 @media (max-width: 920px) {
   .featured-section,
-  .page-intro,
   .article-grid,
   .article-layout {
     grid-template-columns: 1fr;
   }
 
   .project-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .hero-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -750,11 +672,6 @@ a {
     margin-top: 8px;
   }
 
-  .page-intro h1 {
-    font-size: 23px;
-  }
-
-  .hero-panel,
   .article-summary,
   .project-grid {
     grid-template-columns: 1fr;

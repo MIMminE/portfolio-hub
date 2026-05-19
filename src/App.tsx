@@ -20,8 +20,6 @@ const categoryDescriptions: Record<ProjectCategory, string> = {
 
 export function App() {
   const statusByProject = new Map(statuses.map((status) => [status.id, status]));
-  const syncedAt = statuses[0]?.syncedAt;
-  const portfolioReadyCount = displayProjects.filter((project) => project.status === "Portfolio Ready").length;
   const selectedProjectId = new URLSearchParams(window.location.search).get("project");
   const selectedProject = displayProjects.find((project) => project.id === selectedProjectId);
 
@@ -42,42 +40,6 @@ export function App() {
           </a>
         </div>
       </nav>
-
-      <section className="page-intro">
-        <div>
-          <p className="eyebrow">Software Engineering Portfolio</p>
-          <h1>실무 문제를 제품과 시스템으로 풀어낸 기록</h1>
-        </div>
-        <p>
-          각 프로젝트의 화면, 설계 문서, 실행 단위를 함께 확인할 수 있도록 정리했습니다.
-        </p>
-      </section>
-
-      <section className="hero-panel" aria-label="Portfolio summary">
-        <div>
-          <strong>{displayProjects.length}</strong>
-          <span>프로젝트</span>
-        </div>
-        <div>
-          <strong>{portfolioReadyCount}</strong>
-          <span>정리 완료</span>
-        </div>
-        <div>
-          <strong>{categories.length}</strong>
-          <span>분야</span>
-        </div>
-        <div>
-          <strong>{syncedAt ? formatDate(syncedAt) : "manual"}</strong>
-          <span>최근 갱신</span>
-        </div>
-      </section>
-
-      <section className="focus-strip" aria-label="Portfolio focus">
-        <span>운영 도메인</span>
-        <span>백엔드 설계</span>
-        <span>관리자 화면</span>
-        <span>성능 검증</span>
-      </section>
 
       <section id="projects" className="projects-section">
         <div className="section-heading">
