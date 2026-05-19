@@ -36,6 +36,11 @@ pnpm build
 pnpm sync:github
 ```
 
+## Portfolio Review
+
+프로젝트별 로컬 UI, 문서 상태, 이력서 포트폴리오 관점의 시연 순서는
+[docs/project-ui-review.md](docs/project-ui-review.md)에 정리했습니다.
+
 ## Deployment Target
 
 정적 빌드 산출물인 `dist/`를 AWS S3 + CloudFront로 배포하는 것을 목표로 합니다.
