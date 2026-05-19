@@ -666,8 +666,6 @@ a {
   top: 18px;
   display: grid;
   gap: 12px;
-  max-height: calc(100vh - 36px);
-  overflow: auto;
 }
 
 .article-sidebar-card {
@@ -685,6 +683,12 @@ a {
   margin: 0 0 8px;
   color: #202428;
   font-size: 14px;
+}
+
+.article-sidebar .floating-toc-panel {
+  max-height: none;
+  overflow: visible;
+  padding: 0;
 }
 
 .markdown-card {
@@ -848,8 +852,6 @@ a {
 
   .article-sidebar {
     position: static;
-    max-height: none;
-    overflow: visible;
   }
 }
 
