@@ -8,10 +8,13 @@
 project-repo/
 ├─ .portfolio/
 │  └─ manifest.json
+├─ blog/
+│  ├─ article.md
+│  └─ images/
+│     ├─ cover.png
+│     └─ admin-dashboard.png
 ├─ docs/
-│  ├─ resume-portfolio.md
-│  └─ assets/
-│     └─ portfolio/
+│  └─ architecture.md
 ├─ releases/
 │  └─ warehouse-ops-suite-1.0.0.zip
 └─ .github/
@@ -21,7 +24,8 @@ project-repo/
 
 ## .portfolio/manifest.json
 
-프로젝트 안에서는 기존 문서 경로를 그대로 참조한다.
+프로젝트 안에서는 포트폴리오 게시물용 본문과 이미지를 `blog/` 아래에 둔다.
+`docs/`는 아키텍처, API, 운영 문서처럼 프로젝트 내부 문서 보관용으로 사용한다.
 
 ```json
 {
@@ -33,8 +37,8 @@ project-repo/
   "summary": "입고, 적치, 재고, 출고 지시, 피킹 웨이브를 연결한 WMS 프로젝트입니다.",
   "stacks": ["Kotlin", "Spring Boot", "React", "PostgreSQL"],
   "repoUrl": "https://github.com/MIMminE/warehouse-ops-suite",
-  "article": "docs/resume-portfolio.md",
-  "coverImage": "docs/assets/portfolio/01-dashboard.png",
+  "article": "blog/article.md",
+  "coverImage": "blog/images/cover.png",
   "coverAlt": "운영 현황 대시보드",
   "links": [
     {
@@ -84,7 +88,7 @@ on:
     branches: [main, master]
     paths:
       - ".portfolio/**"
-      - "docs/**"
+      - "blog/**"
       - "README.md"
       - ".github/workflows/publish-portfolio-package.yml"
   workflow_dispatch:

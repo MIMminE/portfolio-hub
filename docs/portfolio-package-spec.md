@@ -27,6 +27,44 @@
 - `article.md`가 실제 블로그 본문이다.
 - `links`는 본문이 아니라 외부 링크 또는 다운로드 링크다.
 
+## Source Repository Layout
+
+각 프로젝트 레포에서는 포트폴리오 게시물 소스를 `blog/` 패키지 아래에 둔다.
+
+```text
+project-repo/
+├─ .portfolio/
+│  └─ manifest.json
+├─ blog/
+│  ├─ article.md
+│  └─ images/
+│     ├─ cover.png
+│     └─ admin-dashboard.png
+├─ docs/
+│  └─ architecture.md
+└─ releases/
+   └─ project-demo-1.0.0.zip
+```
+
+권장 역할:
+
+- `blog/article.md`: 허브 상세 페이지에 렌더링되는 본문
+- `blog/images/`: 본문 이미지와 대표 이미지
+- `docs/`: 프로젝트 내부 설계, API, 운영 문서
+- `.portfolio/manifest.json`: 허브가 읽는 게시물 메타데이터
+- `releases/`: 다운로드 가능한 릴리즈 산출물
+
+프로젝트 레포의 source manifest는 아래처럼 `blog/` 경로를 가리킨다.
+
+```json
+{
+  "article": "blog/article.md",
+  "coverImage": "blog/images/cover.png"
+}
+```
+
+CI는 이 source manifest를 S3 업로드용 manifest로 변환한다.
+
 ## S3 Layout
 
 S3에는 아래 구조로 업로드한다.
@@ -99,9 +137,10 @@ portfolio-feed/
 | `projects[].id` | yes | 프로젝트 고유 ID |
 | `projects[].manifestUrl` | yes | 해당 프로젝트의 `manifest.json` 경로 |
 
-## manifest.json
+## Uploaded manifest.json
 
-프로젝트 패키지의 중심 메타데이터다.
+S3 패키지 안에 업로드되는 중심 메타데이터다.
+프로젝트 레포의 `.portfolio/manifest.json`을 그대로 올리지 않고, CI가 패키지 기준 상대 경로로 변환한다.
 
 ```json
 {
@@ -181,9 +220,10 @@ portfolio-feed/
 - `stacks`: 4~8개
 - `coverImage`: 화면 캡처 또는 실제 산출물 이미지
 
-## article.md
+## blog/article.md
 
-`article.md`가 실제 상세 블로그 본문이다.
+프로젝트 레포에서는 `blog/article.md`가 실제 상세 블로그 본문이다.
+CI가 이 파일을 S3 패키지의 `article.md`로 복사한다.
 
 ```md
 # Warehouse Ops Suite
@@ -242,7 +282,7 @@ portfolio-feed/
 
 권장:
 
-- 본문 이미지는 `images/` 아래에 둔다.
+- 본문 이미지는 프로젝트 레포의 `blog/images/` 아래에 둔다.
 - 파일명은 소문자 kebab-case를 사용한다.
 - 화면 캡처는 민감 정보와 실제 고객사 데이터를 제거한다.
 - 외부 이미지 URL도 가능하지만, 장기 보존을 위해 S3 패키지 내부 업로드를 권장한다.
