@@ -38,7 +38,16 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
         </div>
 
-        <p className="project-description">{project.summary}</p>
+        <dl className="case-study-summary">
+          <div>
+            <dt>맥락</dt>
+            <dd>{project.subtitle}</dd>
+          </div>
+          <div>
+            <dt>접근</dt>
+            <dd>{project.summary}</dd>
+          </div>
+        </dl>
 
         <div className="stack-list" aria-label={`${project.title} tech stack`}>
           {project.stacks.slice(0, 6).map((stack) => (
