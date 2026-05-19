@@ -102,7 +102,6 @@ export function App() {
                   <ProjectCard
                     key={project.id}
                     project={project}
-                    status={statusByProject.get(project.id)}
                   />
                 ))}
               </div>

@@ -1,16 +1,10 @@
-import type { GeneratedProjectStatus, Project } from "../types/project";
+import type { Project } from "../types/project";
 
 interface ProjectCardProps {
   project: Project;
-  status?: GeneratedProjectStatus;
 }
 
-export function ProjectCard({ project, status }: ProjectCardProps) {
-  const latestReleaseUrl = status?.latestReleaseUrl;
-  const releaseLink = latestReleaseUrl
-    ? [{ label: status.latestReleaseTag ?? "Latest Release", url: latestReleaseUrl, type: "release" as const }]
-    : [];
-  const links = [...project.links, ...releaseLink];
+export function ProjectCard({ project }: ProjectCardProps) {
   const articleUrl = `/?project=${encodeURIComponent(project.id)}`;
   const openArticle = () => {
     window.location.href = articleUrl;
@@ -50,50 +44,13 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
 
         <p className="project-description">{project.summary}</p>
 
-        <dl className="project-facts">
-          <div>
-            <dt>최근 작업</dt>
-            <dd>{status?.latestReleaseTag ?? status?.latestCommitMessage ?? "sync pending"}</dd>
-          </div>
-          <div>
-            <dt>갱신일</dt>
-            <dd>{status?.pushedAt ? formatDate(status.pushedAt) : "not synced"}</dd>
-          </div>
-        </dl>
-
         <div className="stack-list" aria-label={`${project.title} tech stack`}>
           {project.stacks.slice(0, 6).map((stack) => (
             <span key={stack}>{stack}</span>
           ))}
         </div>
 
-        <div className="document-box">
-          <strong>상세 글</strong>
-          <p>{project.entryDocumentPath}</p>
-        </div>
-
-        {project.localDemo ? (
-          <p className="local-demo-note">
-            화면/콘솔: <span>{project.localDemo.label}</span>
-          </p>
-        ) : null}
-
-        <div className="link-row">
-          {links.map((link) => (
-            <a
-              className={`link-${link.type}`}
-              key={`${link.type}-${link.label}`}
-              href={link.url}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
+        <span className="card-read-more">자세히 보기</span>
       </div>
     </article>
   );
@@ -109,12 +66,4 @@ function statusClass(status: Project["status"]) {
   }
 
   return "status-cleanup";
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).format(new Date(value));
 }
