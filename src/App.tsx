@@ -227,7 +227,6 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
             </section>
             {tocHeadings.length > 0 ? (
               <section className="article-sidebar-card toc-sidebar-card">
-                <h2>목차</h2>
                 <FloatingTocPanel
                   activeHeadingId={activeHeadingId}
                   headings={tocHeadings}

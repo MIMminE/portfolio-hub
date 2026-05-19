@@ -691,12 +691,6 @@ a {
   padding: 12px;
 }
 
-.toc-sidebar-card h2 {
-  margin: 0 0 8px;
-  color: #202428;
-  font-size: 14px;
-}
-
 .article-sidebar .floating-toc-panel {
   max-height: none;
   overflow: visible;
