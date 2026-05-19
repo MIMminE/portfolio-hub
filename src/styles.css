@@ -100,8 +100,7 @@ a {
   color: #2a3036;
 }
 
-.featured-section,
-.closing-note {
+.featured-section {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(240px, 0.35fr);
   gap: 24px;
@@ -112,14 +111,12 @@ a {
   padding: 24px;
 }
 
-.featured-copy h2,
-.closing-note h2 {
+.featured-copy h2 {
   margin: 0;
   font-size: 24px;
 }
 
-.featured-copy p,
-.closing-note p {
+.featured-copy p {
   margin: 12px 0 0;
   color: #5c6670;
   line-height: 1.65;
@@ -346,10 +343,6 @@ a {
 
 .link-demo {
   background: #e5eaf2 !important;
-}
-
-.closing-note {
-  display: block;
 }
 
 .article-shell {

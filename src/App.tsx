@@ -104,13 +104,6 @@ export function App() {
         })}
       </section>
 
-      <section className="closing-note">
-        <h2>읽는 순서</h2>
-        <p>
-          먼저 실무 도메인형 프로젝트에서 화면과 업무 흐름을 확인하고, 이어서 백엔드 아키텍처형과
-          성능 실험형 프로젝트를 보면 설계 범위를 자연스럽게 따라갈 수 있습니다.
-        </p>
-      </section>
     </main>
   );
 }
