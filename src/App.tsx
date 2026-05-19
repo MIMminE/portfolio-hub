@@ -114,16 +114,6 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
   const updatedAt = status?.pushedAt ?? project.syncedFromManifestAt;
   const tocHeadings = useMemo(() => extractTocHeadings(project.entryDocumentMarkdown), [project.entryDocumentMarkdown]);
   const [activeHeadingId, setActiveHeadingId] = useState(tocHeadings[0]?.id ?? "");
-  const externalLinks = status?.latestReleaseUrl
-    ? [
-        ...project.links,
-        {
-          label: status.latestReleaseTag ?? "Latest Release",
-          url: status.latestReleaseUrl,
-          type: "release" as const
-        }
-      ]
-    : project.links;
 
   useEffect(() => {
     const headingElements = Array.from(
@@ -231,22 +221,6 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
                 <div className="sidebar-chip-list">
                   {project.stacks.map((stack) => (
                     <span key={stack}>{stack}</span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h2>문서 링크</h2>
-                <div className="sidebar-link-list">
-                  {externalLinks.map((link) => (
-                    <a
-                      className={`link-${link.type}`}
-                      href={link.url}
-                      key={`${link.type}-${link.label}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {link.label}
-                    </a>
                   ))}
                 </div>
               </div>

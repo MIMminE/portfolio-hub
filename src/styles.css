@@ -595,15 +595,13 @@ a {
   font-size: 14px;
 }
 
-.sidebar-chip-list,
-.sidebar-link-list {
+.sidebar-chip-list {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
 }
 
-.sidebar-chip-list span,
-.sidebar-link-list a {
+.sidebar-chip-list span {
   display: inline-flex;
   min-height: 28px;
   align-items: center;
@@ -615,10 +613,6 @@ a {
   font-size: 12px;
   font-weight: 900;
   text-decoration: none;
-}
-
-.sidebar-link-list a:hover {
-  background: #e7eaed;
 }
 
 .article-section,
