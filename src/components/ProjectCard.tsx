@@ -49,8 +49,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <span key={stack}>{stack}</span>
           ))}
         </div>
-
-        <span className="card-read-more">자세히 보기</span>
       </div>
     </article>
   );
