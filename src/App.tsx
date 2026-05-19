@@ -142,24 +142,27 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
           <p className="eyebrow">{project.category}</p>
           <h1>{project.title}</h1>
           <p>{project.summary}</p>
+          <dl className="article-meta-inline">
+            <div>
+              <dt>상태</dt>
+              <dd>{project.status}</dd>
+            </div>
+            <div>
+              <dt>최근 업데이트</dt>
+              <dd>{updatedAt ? formatDate(updatedAt) : "not synced"}</dd>
+            </div>
+            <div>
+              <dt>문서</dt>
+              <dd>{project.entryDocumentPath}</dd>
+            </div>
+          </dl>
         </header>
 
-        <section className="article-summary">
-          <div>
-            <span>상태</span>
-            <strong>{project.status}</strong>
-          </div>
-          <div>
-            <span>최근 업데이트</span>
-            <strong>{updatedAt ? formatDate(updatedAt) : "not synced"}</strong>
-          </div>
-          <div>
-            <span>문서</span>
-            <strong>{project.entryDocumentPath}</strong>
-          </div>
-        </section>
-
         <div className="article-layout">
+          <section className="markdown-card">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.entryDocumentMarkdown}</ReactMarkdown>
+          </section>
+
           <aside className="article-sidebar" aria-label="Project metadata">
             <section>
               <h2>기술 스택</h2>
@@ -179,10 +182,6 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
               </a>
             </section>
           </aside>
-
-          <section className="markdown-card">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.entryDocumentMarkdown}</ReactMarkdown>
-          </section>
         </div>
 
         <section className="article-links">

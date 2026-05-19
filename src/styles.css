@@ -381,13 +381,40 @@ a {
   line-height: 1.65;
 }
 
-.article-summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+.article-meta-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
 }
 
-.article-summary div,
+.article-meta-inline div {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #d2d7dc;
+  border-radius: 999px;
+  background: #f8f9fa;
+  padding: 7px 10px;
+}
+
+.article-meta-inline dt {
+  color: #66717b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.article-meta-inline dd {
+  overflow: hidden;
+  margin: 0;
+  color: #202428;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .article-section,
 .article-grid > div,
 .article-links {
@@ -395,23 +422,6 @@ a {
   border-radius: 8px;
   background: #f8f9fa;
   padding: 14px;
-}
-
-.article-summary span {
-  display: block;
-  color: #66717b;
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.article-summary strong {
-  display: block;
-  overflow: hidden;
-  margin-top: 6px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 15px;
 }
 
 .article-section h2,
@@ -471,7 +481,7 @@ a {
 
 .article-layout {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 240px;
   gap: 18px;
   align-items: start;
 }
@@ -524,7 +534,7 @@ a {
 
 .markdown-card {
   overflow: hidden;
-  padding: 34px;
+  padding: 30px 34px;
 }
 
 .markdown-card > *:first-child {
@@ -659,7 +669,7 @@ a {
     margin-top: 8px;
   }
 
-  .article-summary,
+  .article-meta-inline,
   .project-grid {
     grid-template-columns: 1fr;
   }
