@@ -11,6 +11,7 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
     ? [{ label: status.latestReleaseTag ?? "Latest Release", url: latestReleaseUrl, type: "release" as const }]
     : [];
   const links = [...project.links, ...releaseLink];
+  const articleUrl = `/?project=${encodeURIComponent(project.id)}`;
 
   return (
     <article className="project-card" id={project.id}>
@@ -79,6 +80,9 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
         </details>
 
         <div className="link-row">
+          <a className="link-article" href={articleUrl} target="_blank" rel="noreferrer">
+            상세 글 보기
+          </a>
           {links.map((link) => (
             <a className={`link-${link.type}`} key={`${link.type}-${link.label}`} href={link.url} target="_blank" rel="noreferrer">
               {link.label}

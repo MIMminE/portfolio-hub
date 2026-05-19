@@ -20,7 +20,12 @@ export function App() {
   const statusByProject = new Map(statuses.map((status) => [status.id, status]));
   const syncedAt = statuses[0]?.syncedAt;
   const portfolioReadyCount = displayProjects.filter((project) => project.status === "Portfolio Ready").length;
-  const featuredProject = displayProjects.find((project) => project.id === "warehouse-ops-suite") ?? displayProjects[0];
+  const selectedProjectId = new URLSearchParams(window.location.search).get("project");
+  const selectedProject = displayProjects.find((project) => project.id === selectedProjectId);
+
+  if (selectedProject) {
+    return <ProjectArticle project={selectedProject} status={statusByProject.get(selectedProject.id)} />;
+  }
 
   return (
     <main className="app-shell">
@@ -36,33 +41,14 @@ export function App() {
         </div>
       </nav>
 
-      <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">Backend Portfolio Hub</p>
-          <h1>운영 도메인과 백엔드 설계를 케이스 스터디로 보여줍니다.</h1>
-          <p className="hero-description">
-            각 프로젝트는 독립 Git 레포로 유지하고, 허브는 화면 이미지, 문서, 최신 릴리즈 상태를 동기화해
-            이력서용 공개 페이지로 정리합니다.
-          </p>
-          <div className="hero-actions">
-            <a href="#projects" className="primary-link">
-              프로젝트 보기
-            </a>
-            <a href="https://github.com/MIMminE" className="secondary-link" target="_blank" rel="noreferrer">
-              GitHub 프로필
-            </a>
-          </div>
+      <section className="page-intro">
+        <div>
+          <p className="eyebrow">Case Study Index</p>
+          <h1>프로젝트 기록과 문서를 한 곳에서 읽습니다.</h1>
         </div>
-        {featuredProject ? (
-          <a className="hero-preview" href={`#${featuredProject.id}`}>
-            <img src={featuredProject.coverImage} alt={featuredProject.coverAlt ?? featuredProject.title} />
-            <div>
-              <span>Featured Case Study</span>
-              <strong>{featuredProject.title}</strong>
-              <p>{featuredProject.subtitle}</p>
-            </div>
-          </a>
-        ) : null}
+        <p>
+          각 프로젝트는 독립 레포의 `.portfolio/project.json`에서 설명, 이미지, 문서 링크를 동기화합니다.
+        </p>
       </section>
 
       <section className="hero-panel" aria-label="Portfolio summary">
@@ -90,28 +76,6 @@ export function App() {
         <span>Screen-based case studies</span>
         <span>S3 + CloudFront ready</span>
       </section>
-
-      {featuredProject ? (
-        <section className="featured-section" aria-label="Featured project">
-          <div className="featured-copy">
-            <p className="eyebrow">Recommended First Read</p>
-            <h2>{featuredProject.title}</h2>
-            <p>{featuredProject.description}</p>
-            <ul>
-              {featuredProject.highlights.slice(0, 4).map((highlight) => (
-                <li key={highlight}>{highlight}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="featured-links">
-            {featuredProject.links.slice(0, 4).map((link) => (
-              <a key={`${link.type}-${link.label}`} href={link.url} target="_blank" rel="noreferrer">
-                {link.label}
-              </a>
-            ))}
-          </div>
-        </section>
-      ) : null}
 
       <section id="projects" className="projects-section">
         <div className="section-heading">
@@ -153,6 +117,121 @@ export function App() {
           대표 이미지가 다음 동기화 때 자동으로 갱신됩니다.
         </p>
       </section>
+    </main>
+  );
+}
+
+function ProjectArticle({ project, status }: { project: Project; status?: GeneratedProjectStatus }) {
+  const externalLinks = status?.latestReleaseUrl
+    ? [
+        ...project.links,
+        {
+          label: status.latestReleaseTag ?? "Latest Release",
+          url: status.latestReleaseUrl,
+          type: "release" as const
+        }
+      ]
+    : project.links;
+
+  return (
+    <main className="article-shell">
+      <nav className="top-nav article-nav" aria-label="Project article navigation">
+        <a className="brand-mark" href="/">
+          Portfolio Hub
+        </a>
+        <div>
+          <a href="/" target="_self">
+            Index
+          </a>
+          <a href={`https://github.com/${project.repo}`} target="_blank" rel="noreferrer">
+            Repository
+          </a>
+        </div>
+      </nav>
+
+      <article className="project-article">
+        <header className="article-header">
+          <p className="eyebrow">{project.category}</p>
+          <h1>{project.title}</h1>
+          <p>{project.subtitle}</p>
+        </header>
+
+        {project.coverImage ? (
+          <img className="article-cover" src={project.coverImage} alt={project.coverAlt ?? project.title} />
+        ) : null}
+
+        <section className="article-summary">
+          <div>
+            <span>Status</span>
+            <strong>{project.status}</strong>
+          </div>
+          <div>
+            <span>Updated</span>
+            <strong>{status?.pushedAt ? formatDate(status.pushedAt) : "not synced"}</strong>
+          </div>
+          <div>
+            <span>Latest</span>
+            <strong>{status?.latestReleaseTag ?? status?.latestCommitMessage ?? "sync pending"}</strong>
+          </div>
+        </section>
+
+        <section className="article-section lead-section">
+          <h2>프로젝트 개요</h2>
+          <p>{project.description}</p>
+        </section>
+
+        <section className="article-grid">
+          <div>
+            <h2>문제 정의</h2>
+            <p>{project.problem}</p>
+          </div>
+          <div>
+            <h2>해결 방식</h2>
+            <p>{project.solution}</p>
+          </div>
+        </section>
+
+        <section className="article-section">
+          <h2>포트폴리오 어필 포인트</h2>
+          <p>{project.impact}</p>
+        </section>
+
+        <section className="article-grid">
+          <div>
+            <h2>핵심 기능</h2>
+            <ul>
+              {project.highlights.map((highlight) => (
+                <li key={highlight}>{highlight}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h2>면접에서 말할 포인트</h2>
+            <ul>
+              {project.interviewPoints.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="article-section">
+          <h2>기술 스택</h2>
+          <div className="stack-list article-stacks">
+            {project.stacks.map((stack) => (
+              <span key={stack}>{stack}</span>
+            ))}
+          </div>
+        </section>
+
+        <section className="article-links">
+          {externalLinks.map((link) => (
+            <a className={`link-${link.type}`} key={`${link.type}-${link.label}`} href={link.url} target="_blank" rel="noreferrer">
+              {link.label}
+            </a>
+          ))}
+        </section>
+      </article>
     </main>
   );
 }
