@@ -182,6 +182,13 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
   return (
     <main className="article-shell">
       <DeveloperProfileCard />
+      {tocHeadings.length > 0 ? (
+        <FloatingToc
+          activeHeadingId={activeHeadingId}
+          headings={tocHeadings}
+          onSelect={moveToHeading}
+        />
+      ) : null}
 
       <nav className="top-nav article-nav" aria-label="Project article navigation">
         <a className="brand-mark" href="/">
@@ -218,53 +225,9 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
           </dl>
         </header>
 
-        <div className="article-layout">
-          <section className="markdown-card">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.entryDocumentMarkdown}</ReactMarkdown>
-          </section>
-
-          <aside className="article-sidebar" aria-label="Project metadata">
-            {tocHeadings.length > 0 ? (
-              <section className="toc-section">
-                <h2>목차</h2>
-                <nav className="toc-nav" aria-label="Article table of contents">
-                  {tocHeadings.map((heading) => (
-                    <a
-                      className={`toc-link toc-level-${heading.level} ${
-                        activeHeadingId === heading.id ? "toc-link-active" : ""
-                      }`}
-                      href={`#${heading.id}`}
-                      key={heading.id}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        moveToHeading(heading.id);
-                      }}
-                    >
-                      {heading.text}
-                    </a>
-                  ))}
-                </nav>
-              </section>
-            ) : null}
-            <section>
-              <h2>기술 스택</h2>
-              <div className="stack-list article-stacks">
-                {project.stacks.map((stack) => (
-                  <span key={stack}>{stack}</span>
-                ))}
-              </div>
-            </section>
-            <section>
-              <h2>문서 링크</h2>
-              <a className="sidebar-link" href={project.entryDocumentUrl} target="_blank" rel="noreferrer">
-                원문 보기
-              </a>
-              <a className="sidebar-link" href={`https://github.com/${project.repo}`} target="_blank" rel="noreferrer">
-                레포지토리
-              </a>
-            </section>
-          </aside>
-        </div>
+        <section className="markdown-card">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.entryDocumentMarkdown}</ReactMarkdown>
+        </section>
 
         <section className="article-links">
           {externalLinks.map((link) => (
@@ -275,6 +238,39 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
         </section>
       </article>
     </main>
+  );
+}
+
+function FloatingToc({
+  activeHeadingId,
+  headings,
+  onSelect
+}: {
+  activeHeadingId: string;
+  headings: TocHeading[];
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <details className="floating-toc">
+      <summary className="floating-toc-toggle">목차</summary>
+      <nav className="floating-toc-panel" aria-label="Article table of contents">
+        {headings.map((heading) => (
+          <a
+            className={`toc-link toc-level-${heading.level} ${
+              activeHeadingId === heading.id ? "toc-link-active" : ""
+            }`}
+            href={`#${heading.id}`}
+            key={heading.id}
+            onClick={(event) => {
+              event.preventDefault();
+              onSelect(heading.id);
+            }}
+          >
+            {heading.text}
+          </a>
+        ))}
+      </nav>
+    </details>
   );
 }
 
