@@ -57,7 +57,7 @@ export function App() {
 
   return (
     <main className="app-shell">
-      <DeveloperProfileCard />
+      <FloatingTools />
 
       <nav className="top-nav" aria-label="Portfolio navigation">
         <a className="brand-mark" href="#">
@@ -181,14 +181,17 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
 
   return (
     <main className="article-shell">
-      <DeveloperProfileCard />
-      {tocHeadings.length > 0 ? (
-        <FloatingToc
-          activeHeadingId={activeHeadingId}
-          headings={tocHeadings}
-          onSelect={moveToHeading}
-        />
-      ) : null}
+      <FloatingTools
+        toc={
+          tocHeadings.length > 0
+            ? {
+                activeHeadingId,
+                headings: tocHeadings,
+                onSelect: moveToHeading
+              }
+            : undefined
+        }
+      />
 
       <nav className="top-nav article-nav" aria-label="Project article navigation">
         <a className="brand-mark" href="/">
@@ -257,7 +260,66 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
   );
 }
 
-function FloatingToc({
+function FloatingTools({
+  toc
+}: {
+  toc?: {
+    activeHeadingId: string;
+    headings: TocHeading[];
+    onSelect: (id: string) => void;
+  };
+}) {
+  const [activeTool, setActiveTool] = useState<"profile" | "toc" | null>(null);
+
+  useEffect(() => {
+    if (activeTool === "toc" && !toc) {
+      setActiveTool(null);
+    }
+  }, [activeTool, toc]);
+
+  const toggleTool = (tool: "profile" | "toc") => {
+    setActiveTool((currentTool) => (currentTool === tool ? null : tool));
+  };
+
+  return (
+    <aside className={`floating-tools ${activeTool ? "is-open" : ""}`} aria-label="Portfolio reading tools">
+      <div className="floating-tool-bar" role="group" aria-label="Reading tools">
+        <button
+          aria-expanded={activeTool === "profile"}
+          className={activeTool === "profile" ? "is-active" : ""}
+          onClick={() => toggleTool("profile")}
+          type="button"
+        >
+          Profile
+        </button>
+        {toc ? (
+          <button
+            aria-expanded={activeTool === "toc"}
+            className={activeTool === "toc" ? "is-active" : ""}
+            onClick={() => toggleTool("toc")}
+            type="button"
+          >
+            목차
+          </button>
+        ) : null}
+      </div>
+      {activeTool ? (
+        <div className="floating-tool-panel">
+          {activeTool === "profile" ? <DeveloperProfilePanel /> : null}
+          {activeTool === "toc" && toc ? (
+            <FloatingTocPanel
+              activeHeadingId={toc.activeHeadingId}
+              headings={toc.headings}
+              onSelect={toc.onSelect}
+            />
+          ) : null}
+        </div>
+      ) : null}
+    </aside>
+  );
+}
+
+function FloatingTocPanel({
   activeHeadingId,
   headings,
   onSelect
@@ -267,54 +329,48 @@ function FloatingToc({
   onSelect: (id: string) => void;
 }) {
   return (
-    <details className="floating-toc">
-      <summary className="floating-toc-toggle">목차</summary>
-      <nav className="floating-toc-panel" aria-label="Article table of contents">
-        {headings.map((heading) => (
-          <a
-            className={`toc-link toc-level-${heading.level} ${
-              activeHeadingId === heading.id ? "toc-link-active" : ""
-            }`}
-            href={`#${heading.id}`}
-            key={heading.id}
-            onClick={(event) => {
-              event.preventDefault();
-              onSelect(heading.id);
-            }}
-          >
-            {heading.text}
-          </a>
-        ))}
-      </nav>
-    </details>
+    <nav className="floating-toc-panel" aria-label="Article table of contents">
+      {headings.map((heading) => (
+        <a
+          className={`toc-link toc-level-${heading.level} ${
+            activeHeadingId === heading.id ? "toc-link-active" : ""
+          }`}
+          href={`#${heading.id}`}
+          key={heading.id}
+          onClick={(event) => {
+            event.preventDefault();
+            onSelect(heading.id);
+          }}
+        >
+          {heading.text}
+        </a>
+      ))}
+    </nav>
   );
 }
 
-function DeveloperProfileCard() {
+function DeveloperProfilePanel() {
   return (
-    <details className="profile-card" aria-label="Developer profile">
-      <summary className="profile-toggle">Profile</summary>
-      <div className="profile-panel">
-        <div>
-          <p className="profile-kicker">Developer</p>
-          <h2>서동원</h2>
-          <p>Backend / Full-stack Developer</p>
-        </div>
-        <p>
-          운영 도메인, 백오피스, 커머스, 물류 WMS 프로젝트를 중심으로 실무 문제를 제품과 시스템으로
-          정리합니다.
-        </p>
-        <ul>
-          <li>Java/Kotlin Spring Boot</li>
-          <li>React, TypeScript</li>
-          <li>PostgreSQL, Redis, Docker</li>
-          <li>AWS, GitHub Actions</li>
-        </ul>
-        <a href="https://github.com/MIMminE" target="_blank" rel="noreferrer">
-          GitHub 보기
-        </a>
+    <div className="profile-panel">
+      <div>
+        <p className="profile-kicker">Developer</p>
+        <h2>서동원</h2>
+        <p>Backend / Full-stack Developer</p>
       </div>
-    </details>
+      <p>
+        운영 도메인, 백오피스, 커머스, 물류 WMS 프로젝트를 중심으로 실무 문제를 제품과 시스템으로
+        정리합니다.
+      </p>
+      <ul>
+        <li>Java/Kotlin Spring Boot</li>
+        <li>React, TypeScript</li>
+        <li>PostgreSQL, Redis, Docker</li>
+        <li>AWS, GitHub Actions</li>
+      </ul>
+      <a href="https://github.com/MIMminE" target="_blank" rel="noreferrer">
+        GitHub 보기
+      </a>
+    </div>
   );
 }
 

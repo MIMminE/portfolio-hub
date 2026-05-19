@@ -68,48 +68,69 @@ a {
   color: #1f252b;
 }
 
-.profile-card {
+.floating-tools {
   position: fixed;
   right: 18px;
   top: 86px;
   z-index: 14;
-  width: 44px;
-}
-
-.profile-card[open] {
-  width: min(300px, calc(100vw - 32px));
-}
-
-.profile-toggle {
   display: grid;
-  place-items: center;
-  width: 44px;
-  min-height: 44px;
-  border: 1px solid #c9d0d7;
+  width: min(300px, calc(100vw - 32px));
+  gap: 6px;
+  justify-items: end;
+  pointer-events: none;
+}
+
+.floating-tool-bar {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  border: 1px solid #cbd2d9;
   border-radius: 999px;
-  background: #f8f9fa;
+  background: rgba(248, 249, 250, 0.92);
   box-shadow: 0 10px 24px rgba(31, 37, 43, 0.12);
-  color: #303840;
+  padding: 4px;
+  pointer-events: auto;
+}
+
+.floating-tool-bar button {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #4c5660;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
-  list-style: none;
+  justify-content: center;
+  min-width: 62px;
+  padding: 0 12px;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
-.profile-toggle::-webkit-details-marker {
-  display: none;
+.floating-tool-bar button:hover {
+  background: #ffffff;
+  color: #252b31;
+  transform: translateY(-1px);
 }
 
-.profile-card[open] .profile-toggle {
-  margin-left: auto;
+.floating-tool-bar button.is-active {
+  background: #252b31;
+  color: #ffffff;
 }
 
-.profile-panel {
+.floating-tool-panel {
+  width: 100%;
   margin-top: 8px;
   border: 1px solid #cbd2d9;
   border-radius: 8px;
-  background: #f9fafb;
+  background: rgba(249, 250, 251, 0.97);
   box-shadow: 0 18px 42px rgba(31, 37, 43, 0.18);
+  pointer-events: auto;
+}
+
+.profile-panel {
   padding: 16px;
 }
 
@@ -157,52 +178,12 @@ a {
   text-decoration: none;
 }
 
-.floating-toc {
-  position: fixed;
-  right: 18px;
-  top: 148px;
-  z-index: 13;
-  width: min(280px, calc(100vw - 32px));
-}
-
-.floating-toc-toggle {
-  display: flex;
-  min-height: 38px;
-  align-items: center;
-  border: 1px solid #c9d0d7;
-  border-radius: 999px;
-  background: #f8f9fa;
-  box-shadow: 0 10px 24px rgba(31, 37, 43, 0.12);
-  color: #303840;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 900;
-  justify-content: center;
-  list-style: none;
-  padding: 0 14px;
-  width: fit-content;
-  margin-left: auto;
-}
-
-.floating-toc-toggle::-webkit-details-marker {
-  display: none;
-}
-
 .floating-toc-panel {
   display: grid;
   max-height: min(64vh, 620px);
   overflow: auto;
-  border: 1px solid #cbd2d9;
-  border-radius: 8px;
-  background: rgba(249, 250, 251, 0.94);
-  box-shadow: 0 16px 36px rgba(31, 37, 43, 0.14);
   gap: 4px;
   padding: 12px;
-  margin-top: 8px;
-}
-
-.floating-toc:not([open]) .floating-toc-panel {
-  display: none;
 }
 
 .eyebrow {
@@ -784,17 +765,11 @@ a {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .profile-card {
+  .floating-tools {
     right: 12px;
     top: auto;
     bottom: 14px;
-  }
-
-  .floating-toc {
-    right: 68px;
-    top: auto;
-    bottom: 14px;
-    width: min(240px, calc(100vw - 88px));
+    width: min(300px, calc(100vw - 24px));
   }
 
   .floating-toc-panel {
