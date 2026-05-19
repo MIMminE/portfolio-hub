@@ -351,7 +351,13 @@ function removeDuplicateTitleHeading(markdown: string, title: string) {
   const firstContentLine = lines[firstContentLineIndex];
   const match = /^#\s+(.+)$/.exec(firstContentLine.trim());
 
-  if (!match || normalizeHeadingText(match[1]) !== normalizedTitle) {
+  if (!match) {
+    return markdown;
+  }
+
+  const normalizedHeading = normalizeHeadingText(match[1]);
+
+  if (normalizedHeading !== normalizedTitle && !normalizedHeading.startsWith(`${normalizedTitle} `)) {
     return markdown;
   }
 
