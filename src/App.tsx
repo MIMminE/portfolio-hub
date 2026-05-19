@@ -1,16 +1,17 @@
+import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import generatedStatuses from "./data/generated-status.json";
 import generatedProjects from "./data/generated-projects.json";
 import { projects } from "./data/projects";
+import { loadPortfolioFeed } from "./data/loadPortfolioFeed";
 import { ProjectCard } from "./components/ProjectCard";
 import type { GeneratedProjectStatus, Project, ProjectCategory } from "./types/project";
 
 const statuses = generatedStatuses as GeneratedProjectStatus[];
 const syncedProjects = generatedProjects as Project[];
 
-const displayProjects = syncedProjects.length > 0 ? syncedProjects : projects;
-const categories = Array.from(new Set(displayProjects.map((project) => project.category))) as ProjectCategory[];
+const fallbackProjects = syncedProjects.length > 0 ? syncedProjects : projects;
 
 const categoryDescriptions: Record<ProjectCategory, string> = {
   "실무 도메인형": "운영 조직, 업무 흐름, 화면 사용성을 함께 설계한 프로젝트",
@@ -19,9 +20,36 @@ const categoryDescriptions: Record<ProjectCategory, string> = {
 };
 
 export function App() {
+  const [displayProjects, setDisplayProjects] = useState<Project[]>(fallbackProjects);
+  const [feedError, setFeedError] = useState<string | null>(null);
   const statusByProject = new Map(statuses.map((status) => [status.id, status]));
+  const categories = useMemo(
+    () => Array.from(new Set(displayProjects.map((project) => project.category))) as ProjectCategory[],
+    [displayProjects]
+  );
   const selectedProjectId = new URLSearchParams(window.location.search).get("project");
   const selectedProject = displayProjects.find((project) => project.id === selectedProjectId);
+
+  useEffect(() => {
+    let ignore = false;
+
+    loadPortfolioFeed()
+      .then((feedProjects) => {
+        if (!ignore && feedProjects.length > 0) {
+          setDisplayProjects(feedProjects);
+          setFeedError(null);
+        }
+      })
+      .catch((error) => {
+        if (!ignore) {
+          setFeedError(error instanceof Error ? error.message : "Portfolio feed load failed");
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   if (selectedProject) {
     return <ProjectArticle project={selectedProject} status={statusByProject.get(selectedProject.id)} />;
@@ -42,6 +70,10 @@ export function App() {
       </nav>
 
       <section id="projects" className="projects-section">
+        {feedError ? (
+          <p className="feed-warning">포트폴리오 패키지를 불러오지 못해 빌드 시점 데이터를 표시합니다.</p>
+        ) : null}
+
         <div className="section-heading">
           <div>
             <p className="eyebrow">Selected Work</p>
@@ -84,6 +116,7 @@ export function App() {
 }
 
 function ProjectArticle({ project, status }: { project: Project; status?: GeneratedProjectStatus }) {
+  const updatedAt = status?.pushedAt ?? project.syncedFromManifestAt;
   const externalLinks = status?.latestReleaseUrl
     ? [
         ...project.links,
@@ -125,7 +158,7 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
           </div>
           <div>
             <span>최근 업데이트</span>
-            <strong>{status?.pushedAt ? formatDate(status.pushedAt) : "not synced"}</strong>
+            <strong>{updatedAt ? formatDate(updatedAt) : "not synced"}</strong>
           </div>
           <div>
             <span>문서</span>

@@ -1,0 +1,38 @@
+{
+  "id": "kotlin-commerce-core",
+  "title": "Kotlin Commerce Core",
+  "subtitle": "Kafka 이벤트 기반 커머스 MSA",
+  "category": "백엔드 아키텍처형",
+  "status": "Portfolio Ready",
+  "summary": "주문, 재고, 결제, 상품 서비스를 Kafka 이벤트로 연결하고 Transactional Outbox, Lease, Idempotency를 적용한 커머스 프로젝트입니다.",
+  "stacks": [
+    "Kotlin",
+    "Spring Boot",
+    "Kafka",
+    "PostgreSQL",
+    "Redis",
+    "Docker Compose",
+    "Testcontainers"
+  ],
+  "repoUrl": "https://github.com/MIMminE/kotlin-commerce-core",
+  "article": "./article.md",
+  "coverImage": "https://raw.githubusercontent.com/MIMminE/kotlin-commerce-core/master/portfolio/web-client-preview.png",
+  "coverAlt": "Kotlin Commerce Core 데모 UI",
+  "updatedAt": "2026-05-19T07:10:40.503Z",
+  "localDemo": {
+    "label": "Commerce Demo UI",
+    "url": "http://localhost:5183"
+  },
+  "links": [
+    {
+      "label": "포트폴리오 설명",
+      "url": "https://github.com/MIMminE/kotlin-commerce-core/blob/master/portfolio/portfolio.md",
+      "type": "docs"
+    },
+    {
+      "label": "API 목록",
+      "url": "https://github.com/MIMminE/kotlin-commerce-core/blob/master/portfolio/portfolio_api_list.md",
+      "type": "docs"
+    }
+  ]
+}

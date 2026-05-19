@@ -35,6 +35,34 @@ export interface Project {
   links: ProjectLink[];
 }
 
+export interface PortfolioFeedIndex {
+  version: string;
+  generatedAt: string;
+  projects: PortfolioFeedEntry[];
+}
+
+export interface PortfolioFeedEntry {
+  id: string;
+  manifestUrl: string;
+}
+
+export interface PortfolioPackageManifest {
+  id: string;
+  title: string;
+  subtitle: string;
+  category: ProjectCategory;
+  status: ProjectStatus;
+  summary: string;
+  stacks: string[];
+  repoUrl: string;
+  article: string;
+  coverImage?: string;
+  coverAlt?: string;
+  updatedAt?: string;
+  localDemo?: ProjectLocalDemo;
+  links?: ProjectLink[];
+}
+
 export interface GeneratedProjectStatus {
   id: string;
   repo: string;

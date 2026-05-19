@@ -1,0 +1,33 @@
+{
+  "id": "order-service-iac-cicd",
+  "title": "Order Service IaC/CD",
+  "subtitle": "주문 서비스와 AWS 배포 파이프라인",
+  "category": "백엔드 아키텍처형",
+  "status": "Portfolio Ready",
+  "summary": "Spring Boot 주문 서비스에 Terraform, AWS ECS, GitHub Actions 배포 흐름을 붙인 백엔드/인프라 프로젝트입니다.",
+  "stacks": [
+    "Kotlin",
+    "Spring Boot",
+    "Terraform",
+    "AWS ECS",
+    "ECR",
+    "GitHub Actions",
+    "PostgreSQL"
+  ],
+  "repoUrl": "https://github.com/MIMminE/order-service-iac-cicd",
+  "article": "./article.md",
+  "coverImage": "https://raw.githubusercontent.com/MIMminE/order-service-iac-cicd/master/portfolio/order-console-main.png",
+  "coverAlt": "Order Service IaC/CD 배포 콘솔",
+  "updatedAt": "2026-05-19T07:10:40.557Z",
+  "localDemo": {
+    "label": "Order Console",
+    "url": "http://localhost:18082"
+  },
+  "links": [
+    {
+      "label": "포트폴리오 설명",
+      "url": "https://github.com/MIMminE/order-service-iac-cicd/blob/master/portfolio/portfolio.md",
+      "type": "docs"
+    }
+  ]
+}

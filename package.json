@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "sync:github": "tsx scripts/sync-github-projects.ts",
     "sync:manifests": "tsx scripts/sync-project-manifests.ts",
-    "sync:all": "pnpm sync:github && pnpm sync:manifests"
+    "sync:packages": "tsx scripts/build-local-portfolio-feed.ts",
+    "sync:all": "pnpm sync:github && pnpm sync:manifests && pnpm sync:packages"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",

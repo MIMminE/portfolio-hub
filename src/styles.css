@@ -155,6 +155,17 @@ a {
   margin-top: 28px;
 }
 
+.feed-warning {
+  border: 1px solid #d7c8a8;
+  border-radius: 6px;
+  background: #fff7e8;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  color: #6a5124;
+  font-size: 14px;
+  font-weight: 800;
+}
+
 .section-heading {
   display: flex;
   gap: 18px;

@@ -1,0 +1,43 @@
+{
+  "id": "maternity-care-commerce",
+  "title": "Maternity Care Commerce",
+  "subtitle": "모성 케어 커머스와 운영 백오피스",
+  "category": "실무 도메인형",
+  "status": "Portfolio Ready",
+  "summary": "임신·출산·육아 도메인의 사용자 서비스, D2C 커머스, 관리자 운영 시스템을 통합한 백엔드 중심 프로젝트입니다.",
+  "stacks": [
+    "Java",
+    "Spring Boot",
+    "Spring Security",
+    "JPA",
+    "PostgreSQL",
+    "React",
+    "TypeScript"
+  ],
+  "repoUrl": "https://github.com/MIMminE/maternity-care-commerce",
+  "article": "./article.md",
+  "coverImage": "https://raw.githubusercontent.com/MIMminE/maternity-care-commerce/main/docs/assets/portfolio/admin-dashboard.png",
+  "coverAlt": "Maternity Care Commerce 관리자 대시보드",
+  "updatedAt": "2026-05-19T07:10:40.563Z",
+  "localDemo": {
+    "label": "Admin/Client Web",
+    "url": "http://localhost:5174"
+  },
+  "links": [
+    {
+      "label": "README",
+      "url": "https://github.com/MIMminE/maternity-care-commerce/blob/main/README.md",
+      "type": "docs"
+    },
+    {
+      "label": "최종 보고서",
+      "url": "https://github.com/MIMminE/maternity-care-commerce/blob/main/docs/final-report.md",
+      "type": "docs"
+    },
+    {
+      "label": "아키텍처",
+      "url": "https://github.com/MIMminE/maternity-care-commerce/blob/main/docs/architecture.md",
+      "type": "docs"
+    }
+  ]
+}
