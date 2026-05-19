@@ -1,3 +1,5 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import generatedStatuses from "./data/generated-status.json";
 import generatedProjects from "./data/generated-projects.json";
 import { projects } from "./data/projects";
@@ -43,11 +45,11 @@ export function App() {
 
       <section className="page-intro">
         <div>
-          <p className="eyebrow">Case Study Index</p>
-          <h1>프로젝트 기록과 문서를 한 곳에서 읽습니다.</h1>
+          <p className="eyebrow">Project Document Hub</p>
+          <h1>프로젝트 문서 인덱스</h1>
         </div>
         <p>
-          각 프로젝트는 독립 레포의 `.portfolio/project.json`에서 설명, 이미지, 문서 링크를 동기화합니다.
+          독립 레포의 README와 docs를 동기화해 게시물처럼 보여줍니다.
         </p>
       </section>
 
@@ -71,10 +73,10 @@ export function App() {
       </section>
 
       <section className="sync-strip" aria-label="Hub strategy">
-        <span>Project manifest sync</span>
+        <span>README/docs sync</span>
         <span>GitHub release status</span>
-        <span>Screen-based case studies</span>
-        <span>S3 + CloudFront ready</span>
+        <span>Screen captures</span>
+        <span>Static deploy ready</span>
       </section>
 
       <section id="projects" className="projects-section">
@@ -83,7 +85,7 @@ export function App() {
             <p className="eyebrow">Project Catalog</p>
             <h2>프로젝트 카탈로그</h2>
           </div>
-          <p>각 카드의 내용은 프로젝트 레포의 `.portfolio/project.json`에서 동기화됩니다.</p>
+          <p>카드를 누르면 해당 레포의 대표 문서를 읽는 게시물 페이지로 이동합니다.</p>
         </div>
 
         {categories.map((category) => {
@@ -112,9 +114,8 @@ export function App() {
       <section className="ops-note">
         <h2>운영 방식</h2>
         <p>
-          허브는 각 프로젝트를 직접 포함하지 않고, GitHub API로 최신 커밋/릴리즈와 포트폴리오 manifest를
-          읽습니다. 프로젝트를 업데이트하고 `.portfolio/project.json`을 함께 수정하면 허브의 설명, 문서 링크,
-          대표 이미지가 다음 동기화 때 자동으로 갱신됩니다.
+          허브는 각 프로젝트를 직접 포함하지 않고 GitHub API로 최신 커밋, 릴리즈, 문서 manifest를 읽습니다.
+          프로젝트 레포의 README나 docs 문서가 바뀌면 다음 동기화 때 이 게시물 본문도 함께 갱신됩니다.
         </p>
       </section>
     </main>
@@ -153,7 +154,7 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
         <header className="article-header">
           <p className="eyebrow">{project.category}</p>
           <h1>{project.title}</h1>
-          <p>{project.subtitle}</p>
+          <p>{project.summary}</p>
         </header>
 
         {project.coverImage ? (
@@ -170,59 +171,32 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
             <strong>{status?.pushedAt ? formatDate(status.pushedAt) : "not synced"}</strong>
           </div>
           <div>
-            <span>Latest</span>
-            <strong>{status?.latestReleaseTag ?? status?.latestCommitMessage ?? "sync pending"}</strong>
+            <span>Document</span>
+            <strong>{project.entryDocumentPath}</strong>
           </div>
         </section>
 
-        <section className="article-section lead-section">
-          <h2>프로젝트 개요</h2>
-          <p>{project.description}</p>
-        </section>
+        <div className="article-layout">
+          <aside className="article-sidebar" aria-label="Project metadata">
+            <section>
+              <h2>기술 스택</h2>
+              <div className="stack-list article-stacks">
+                {project.stacks.map((stack) => (
+                  <span key={stack}>{stack}</span>
+                ))}
+              </div>
+            </section>
+            <section>
+              <h2>동기화 기준</h2>
+              <p>{project.entryDocumentPath}</p>
+              <p>{project.syncedFromManifestAt ? formatDateTime(project.syncedFromManifestAt) : "local fallback"}</p>
+            </section>
+          </aside>
 
-        <section className="article-grid">
-          <div>
-            <h2>문제 정의</h2>
-            <p>{project.problem}</p>
-          </div>
-          <div>
-            <h2>해결 방식</h2>
-            <p>{project.solution}</p>
-          </div>
-        </section>
-
-        <section className="article-section">
-          <h2>포트폴리오 어필 포인트</h2>
-          <p>{project.impact}</p>
-        </section>
-
-        <section className="article-grid">
-          <div>
-            <h2>핵심 기능</h2>
-            <ul>
-              {project.highlights.map((highlight) => (
-                <li key={highlight}>{highlight}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h2>면접에서 말할 포인트</h2>
-            <ul>
-              {project.interviewPoints.map((point) => (
-                <li key={point}>{point}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="article-section">
-          <h2>기술 스택</h2>
-          <div className="stack-list article-stacks">
-            {project.stacks.map((stack) => (
-              <span key={stack}>{stack}</span>
-            ))}
-          </div>
-        </section>
+          <section className="markdown-card">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.entryDocumentMarkdown}</ReactMarkdown>
+          </section>
+        </div>
 
         <section className="article-links">
           {externalLinks.map((link) => (
@@ -234,6 +208,16 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
       </article>
     </main>
   );
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(value));
 }
 
 function formatDate(value: string) {

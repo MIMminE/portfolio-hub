@@ -23,15 +23,14 @@ export interface Project {
   category: ProjectCategory;
   status: ProjectStatus;
   repo: string;
-  description: string;
-  problem: string;
-  solution: string;
-  impact: string;
+  summary: string;
   stacks: string[];
-  highlights: string[];
-  interviewPoints: string[];
   coverImage?: string;
   coverAlt?: string;
+  entryDocumentPath: string;
+  entryDocumentUrl: string;
+  entryDocumentMarkdown: string;
+  syncedFromManifestAt?: string;
   localDemo?: ProjectLocalDemo;
   links: ProjectLink[];
 }

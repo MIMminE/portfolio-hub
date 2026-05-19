@@ -1,5 +1,5 @@
 import { mkdir, rename, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, posix, resolve } from "node:path";
 import { Buffer } from "node:buffer";
 import { projects } from "../src/data/projects";
 import type { Project, ProjectCategory, ProjectLink, ProjectStatus } from "../src/types/project";
@@ -30,19 +30,23 @@ interface ProjectManifest {
   subtitle: string;
   category: ProjectCategory;
   status: ProjectStatus;
-  description: string;
-  problem: string;
-  solution: string;
-  impact: string;
+  summary: string;
   stacks: string[];
-  highlights: string[];
-  interviewPoints: string[];
+  entryDocument: string;
   coverImage?: ManifestImage;
   documents?: ManifestDocument[];
   localDemo?: {
     label: string;
     url: string;
   };
+}
+
+interface SyncedProjectManifest extends Omit<ProjectManifest, "entryDocument" | "coverImage" | "documents"> {
+  entryDocumentPath: string;
+  entryDocumentUrl: string;
+  entryDocumentMarkdown: string;
+  coverImage?: ManifestImage;
+  documents?: ManifestDocument[];
 }
 
 const outputPath = resolve("src/data/generated-projects.json");
@@ -64,6 +68,18 @@ async function requestJson<T>(url: string): Promise<T> {
   return (await response.json()) as T;
 }
 
+async function readRepoFile(repoName: string, branch: string, path: string): Promise<string> {
+  const content = await requestJson<GitHubContentResponse>(
+    `https://api.github.com/repos/${repoName}/contents/${encodeURIComponentPath(path)}?ref=${branch}`
+  );
+
+  if (content.encoding !== "base64") {
+    throw new Error(`Unsupported content encoding: ${content.encoding}`);
+  }
+
+  return Buffer.from(content.content, "base64").toString("utf8");
+}
+
 function toBlobUrl(repo: string, branch: string, path: string) {
   return `https://github.com/${repo}/blob/${branch}/${path}`;
 }
@@ -72,22 +88,61 @@ function toRawUrl(repo: string, branch: string, path: string) {
   return `https://raw.githubusercontent.com/${repo}/${branch}/${path}`;
 }
 
-async function readManifest(repoName: string): Promise<ProjectManifest | null> {
+function encodeURIComponentPath(path: string) {
+  return path.split("/").map(encodeURIComponent).join("/");
+}
+
+function isExternalUrl(url: string) {
+  return /^(https?:|mailto:|tel:|#)/i.test(url);
+}
+
+function resolveRelativePath(basePath: string, linkedPath: string) {
+  const [pathPart, suffix = ""] = linkedPath.split(/(?=[#?])/);
+  const baseDir = posix.dirname(basePath);
+  const normalizedPath = posix.normalize(posix.join(baseDir, pathPart));
+
+  return `${normalizedPath}${suffix}`;
+}
+
+function rewriteMarkdownLinks(markdown: string, repoName: string, branch: string, documentPath: string) {
+  const rewrittenImages = markdown.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, href) => {
+    const cleanHref = String(href).trim();
+
+    if (isExternalUrl(cleanHref)) {
+      return match;
+    }
+
+    return `![${alt}](${toRawUrl(repoName, branch, resolveRelativePath(documentPath, cleanHref))})`;
+  });
+
+  return rewrittenImages.replace(/(^|[^!])\[([^\]]+)\]\(([^)]+)\)/g, (match, prefix, label, href) => {
+    const cleanHref = String(href).trim();
+
+    if (isExternalUrl(cleanHref)) {
+      return match;
+    }
+
+    return `${prefix}[${label}](${toBlobUrl(repoName, branch, resolveRelativePath(documentPath, cleanHref))})`;
+  });
+}
+
+async function readManifest(repoName: string): Promise<SyncedProjectManifest | null> {
   const repo = await requestJson<GitHubRepoResponse>(`https://api.github.com/repos/${repoName}`);
   const branch = repo.default_branch;
-  const content = await requestJson<GitHubContentResponse>(
-    `https://api.github.com/repos/${repoName}/contents/.portfolio/project.json?ref=${branch}`
-  );
-
-  if (content.encoding !== "base64") {
-    throw new Error(`Unsupported content encoding: ${content.encoding}`);
-  }
-
-  const json = Buffer.from(content.content, "base64").toString("utf8");
+  const json = await readRepoFile(repoName, branch, ".portfolio/project.json");
   const manifest = JSON.parse(json) as ProjectManifest;
+  const entryDocumentMarkdown = rewriteMarkdownLinks(
+    await readRepoFile(repoName, branch, manifest.entryDocument),
+    repoName,
+    branch,
+    manifest.entryDocument
+  );
 
   return {
     ...manifest,
+    entryDocumentPath: manifest.entryDocument,
+    entryDocumentUrl: toBlobUrl(repoName, branch, manifest.entryDocument),
+    entryDocumentMarkdown,
     coverImage: manifest.coverImage
       ? {
           ...manifest.coverImage,
@@ -101,7 +156,7 @@ async function readManifest(repoName: string): Promise<ProjectManifest | null> {
   };
 }
 
-function manifestToProject(repoName: string, manifest: ProjectManifest): Project {
+function manifestToProject(repoName: string, manifest: SyncedProjectManifest): Project {
   const documentLinks: ProjectLink[] =
     manifest.documents?.map((document) => ({
       label: document.label,
@@ -116,15 +171,14 @@ function manifestToProject(repoName: string, manifest: ProjectManifest): Project
     category: manifest.category,
     status: manifest.status,
     repo: repoName,
-    description: manifest.description,
-    problem: manifest.problem,
-    solution: manifest.solution,
-    impact: manifest.impact,
+    summary: manifest.summary,
     stacks: manifest.stacks,
-    highlights: manifest.highlights,
-    interviewPoints: manifest.interviewPoints,
     coverImage: manifest.coverImage?.path,
     coverAlt: manifest.coverImage?.alt,
+    entryDocumentPath: manifest.entryDocumentPath,
+    entryDocumentUrl: manifest.entryDocumentUrl,
+    entryDocumentMarkdown: manifest.entryDocumentMarkdown,
+    syncedFromManifestAt: new Date().toISOString(),
     localDemo: manifest.localDemo,
     links: [
       { label: "GitHub", url: `https://github.com/${repoName}`, type: "github" },

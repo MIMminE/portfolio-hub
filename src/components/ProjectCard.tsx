@@ -48,7 +48,7 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
           </div>
         </div>
 
-        <p className="project-description">{project.description}</p>
+        <p className="project-description">{project.summary}</p>
 
         <dl className="project-facts">
           <div>
@@ -67,9 +67,9 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
           ))}
         </div>
 
-        <div className="impact-box">
-          <strong>Portfolio Point</strong>
-          <p>{project.impact}</p>
+        <div className="document-box">
+          <strong>대표 문서</strong>
+          <p>{project.entryDocumentPath}</p>
         </div>
 
         {project.localDemo ? (
@@ -77,27 +77,6 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
             Local demo: <span>{project.localDemo.label}</span>
           </p>
         ) : null}
-
-        <details
-          className="project-detail"
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
-        >
-          <summary>핵심 설계 보기</summary>
-          <div>
-            <h5>문제</h5>
-            <p>{project.problem}</p>
-            <h5>해결</h5>
-            <p>{project.solution}</p>
-            <h5>면접 포인트</h5>
-            <ul>
-              {project.interviewPoints.slice(0, 3).map((point) => (
-                <li key={point}>{point}</li>
-              ))}
-            </ul>
-          </div>
-        </details>
 
         <div className="link-row">
           {links.map((link) => (
