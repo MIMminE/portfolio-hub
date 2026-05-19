@@ -68,6 +68,95 @@ a {
   color: #1f252b;
 }
 
+.profile-card {
+  position: fixed;
+  right: 18px;
+  top: 86px;
+  z-index: 12;
+  width: 44px;
+}
+
+.profile-card[open] {
+  width: min(300px, calc(100vw - 32px));
+}
+
+.profile-toggle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  border: 1px solid #c9d0d7;
+  border-radius: 999px;
+  background: #f8f9fa;
+  box-shadow: 0 10px 24px rgba(31, 37, 43, 0.12);
+  color: #303840;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+  list-style: none;
+}
+
+.profile-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.profile-card[open] .profile-toggle {
+  margin-left: auto;
+}
+
+.profile-panel {
+  margin-top: 8px;
+  border: 1px solid #cbd2d9;
+  border-radius: 8px;
+  background: #f9fafb;
+  box-shadow: 0 18px 42px rgba(31, 37, 43, 0.18);
+  padding: 16px;
+}
+
+.profile-kicker {
+  margin: 0 0 5px;
+  color: #697580;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.profile-panel h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.profile-panel p {
+  margin: 8px 0 0;
+  color: #4d5862;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.profile-panel ul {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: #3f4952;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.profile-panel a {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #252b31;
+  margin-top: 14px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
 .eyebrow {
   margin: 0 0 8px;
   color: #697580;
@@ -509,6 +598,42 @@ a {
   font-size: 15px;
 }
 
+.toc-nav {
+  display: grid;
+  gap: 4px;
+}
+
+.toc-link {
+  display: block;
+  border-radius: 6px;
+  color: #5f6b75;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+  padding: 7px 9px;
+  text-decoration: none;
+}
+
+.toc-link:hover {
+  background: #eef1f3;
+  color: #202428;
+}
+
+.toc-link-active {
+  background: #e3e8ed;
+  color: #202428;
+}
+
+.toc-level-2 {
+  padding-left: 18px;
+}
+
+.toc-level-3 {
+  padding-left: 28px;
+  color: #6f7a84;
+  font-size: 12px;
+}
+
 .article-sidebar p {
   margin: 8px 0 0;
   color: #4d5862;
@@ -546,6 +671,7 @@ a {
 .markdown-card h3 {
   color: #202428;
   line-height: 1.25;
+  scroll-margin-top: 90px;
 }
 
 .markdown-card h1 {
@@ -646,6 +772,12 @@ a {
 
   .article-sidebar {
     position: static;
+  }
+
+  .profile-card {
+    right: 12px;
+    top: auto;
+    bottom: 14px;
   }
 }
 

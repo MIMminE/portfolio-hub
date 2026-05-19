@@ -57,6 +57,8 @@ export function App() {
 
   return (
     <main className="app-shell">
+      <DeveloperProfileCard />
+
       <nav className="top-nav" aria-label="Portfolio navigation">
         <a className="brand-mark" href="#">
           Engineering Portfolio
@@ -110,6 +112,8 @@ export function App() {
 
 function ProjectArticle({ project, status }: { project: Project; status?: GeneratedProjectStatus }) {
   const updatedAt = status?.pushedAt ?? project.syncedFromManifestAt;
+  const tocHeadings = useMemo(() => extractTocHeadings(project.entryDocumentMarkdown), [project.entryDocumentMarkdown]);
+  const [activeHeadingId, setActiveHeadingId] = useState(tocHeadings[0]?.id ?? "");
   const externalLinks = status?.latestReleaseUrl
     ? [
         ...project.links,
@@ -121,8 +125,64 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
       ]
     : project.links;
 
+  useEffect(() => {
+    const headingElements = Array.from(
+      document.querySelectorAll<HTMLHeadingElement>(".markdown-card h1, .markdown-card h2, .markdown-card h3")
+    );
+
+    headingElements.forEach((element, index) => {
+      const heading = tocHeadings[index];
+
+      if (heading) {
+        element.id = heading.id;
+      }
+    });
+
+    setActiveHeadingId(tocHeadings[0]?.id ?? "");
+  }, [tocHeadings]);
+
+  useEffect(() => {
+    if (tocHeadings.length === 0) {
+      return;
+    }
+
+    const headingElements = tocHeadings
+      .map((heading) => document.getElementById(heading.id))
+      .filter((element): element is HTMLElement => Boolean(element));
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+
+        if (visibleEntry?.target.id) {
+          setActiveHeadingId(visibleEntry.target.id);
+        }
+      },
+      {
+        rootMargin: "-18% 0px -68% 0px",
+        threshold: [0, 1]
+      }
+    );
+
+    headingElements.forEach((element) => observer.observe(element));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [tocHeadings]);
+
+  const moveToHeading = (id: string) => {
+    setActiveHeadingId(id);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", `#${id}`);
+  };
+
   return (
     <main className="article-shell">
+      <DeveloperProfileCard />
+
       <nav className="top-nav article-nav" aria-label="Project article navigation">
         <a className="brand-mark" href="/">
           Engineering Portfolio
@@ -164,6 +224,28 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
           </section>
 
           <aside className="article-sidebar" aria-label="Project metadata">
+            {tocHeadings.length > 0 ? (
+              <section className="toc-section">
+                <h2>목차</h2>
+                <nav className="toc-nav" aria-label="Article table of contents">
+                  {tocHeadings.map((heading) => (
+                    <a
+                      className={`toc-link toc-level-${heading.level} ${
+                        activeHeadingId === heading.id ? "toc-link-active" : ""
+                      }`}
+                      href={`#${heading.id}`}
+                      key={heading.id}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        moveToHeading(heading.id);
+                      }}
+                    >
+                      {heading.text}
+                    </a>
+                  ))}
+                </nav>
+              </section>
+            ) : null}
             <section>
               <h2>기술 스택</h2>
               <div className="stack-list article-stacks">
@@ -194,6 +276,92 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
       </article>
     </main>
   );
+}
+
+function DeveloperProfileCard() {
+  return (
+    <details className="profile-card" aria-label="Developer profile">
+      <summary className="profile-toggle">Profile</summary>
+      <div className="profile-panel">
+        <div>
+          <p className="profile-kicker">Developer</p>
+          <h2>서동원</h2>
+          <p>Backend / Full-stack Developer</p>
+        </div>
+        <p>
+          운영 도메인, 백오피스, 커머스, 물류 WMS 프로젝트를 중심으로 실무 문제를 제품과 시스템으로
+          정리합니다.
+        </p>
+        <ul>
+          <li>Java/Kotlin Spring Boot</li>
+          <li>React, TypeScript</li>
+          <li>PostgreSQL, Redis, Docker</li>
+          <li>AWS, GitHub Actions</li>
+        </ul>
+        <a href="https://github.com/MIMminE" target="_blank" rel="noreferrer">
+          GitHub 보기
+        </a>
+      </div>
+    </details>
+  );
+}
+
+interface TocHeading {
+  id: string;
+  level: 1 | 2 | 3;
+  text: string;
+}
+
+function extractTocHeadings(markdown: string): TocHeading[] {
+  const headings: TocHeading[] = [];
+  const seen = new Map<string, number>();
+  let inCodeBlock = false;
+
+  markdown.split("\n").forEach((line) => {
+    if (line.trim().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      return;
+    }
+
+    if (inCodeBlock) {
+      return;
+    }
+
+    const match = /^(#{1,3})\s+(.+)$/.exec(line);
+
+    if (!match) {
+      return;
+    }
+
+    const level = match[1].length as 1 | 2 | 3;
+    const text = cleanupHeadingText(match[2]);
+    const baseId = slugifyHeading(text);
+    const count = seen.get(baseId) ?? 0;
+    const id = count === 0 ? baseId : `${baseId}-${count + 1}`;
+    seen.set(baseId, count + 1);
+
+    headings.push({ id, level, text });
+  });
+
+  return headings;
+}
+
+function cleanupHeadingText(value: string) {
+  return value
+    .replace(/#+$/, "")
+    .replace(/\*\*|__|`/g, "")
+    .trim();
+}
+
+function slugifyHeading(value: string) {
+  const slug = value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .trim()
+    .replace(/\s+/g, "-");
+
+  return slug || "section";
 }
 
 function formatDate(value: string) {
