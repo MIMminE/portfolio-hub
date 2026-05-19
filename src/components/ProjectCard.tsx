@@ -12,9 +12,24 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
     : [];
   const links = [...project.links, ...releaseLink];
   const articleUrl = `/?project=${encodeURIComponent(project.id)}`;
+  const openArticle = () => {
+    window.location.href = articleUrl;
+  };
 
   return (
-    <article className="project-card" id={project.id}>
+    <article
+      className="project-card"
+      id={project.id}
+      role="link"
+      tabIndex={0}
+      onClick={openArticle}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openArticle();
+        }
+      }}
+    >
       {project.coverImage ? (
         <img className="project-cover" src={project.coverImage} alt={project.coverAlt ?? `${project.title} preview`} />
       ) : (
@@ -63,7 +78,12 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
           </p>
         ) : null}
 
-        <details className="project-detail">
+        <details
+          className="project-detail"
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+        >
           <summary>핵심 설계 보기</summary>
           <div>
             <h5>문제</h5>
@@ -80,11 +100,17 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
         </details>
 
         <div className="link-row">
-          <a className="link-article" href={articleUrl} target="_blank" rel="noreferrer">
-            상세 글 보기
-          </a>
           {links.map((link) => (
-            <a className={`link-${link.type}`} key={`${link.type}-${link.label}`} href={link.url} target="_blank" rel="noreferrer">
+            <a
+              className={`link-${link.type}`}
+              key={`${link.type}-${link.label}`}
+              href={link.url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
               {link.label}
             </a>
           ))}
