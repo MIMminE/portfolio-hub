@@ -168,7 +168,6 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
 
       <article className="project-article">
         <header className="article-header">
-          <p className="eyebrow">{project.category}</p>
           <h1>{project.title}</h1>
           <p className="article-summary-text">{project.summary}</p>
           <dl className="article-meta-inline">
