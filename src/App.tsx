@@ -89,7 +89,11 @@ export function App() {
 
 function ProjectArticle({ project, status }: { project: Project; status?: GeneratedProjectStatus }) {
   const updatedAt = status?.pushedAt ?? project.syncedFromManifestAt;
-  const tocHeadings = useMemo(() => extractTocHeadings(project.entryDocumentMarkdown), [project.entryDocumentMarkdown]);
+  const articleMarkdown = useMemo(
+    () => removeDuplicateTitleHeading(project.entryDocumentMarkdown, project.title),
+    [project.entryDocumentMarkdown, project.title]
+  );
+  const tocHeadings = useMemo(() => extractTocHeadings(articleMarkdown), [articleMarkdown]);
   const [activeHeadingId, setActiveHeadingId] = useState(tocHeadings[0]?.id ?? "");
 
   useEffect(() => {
@@ -185,7 +189,7 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
 
         <div className="article-content-layout">
           <section className="markdown-card">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.entryDocumentMarkdown}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{articleMarkdown}</ReactMarkdown>
           </section>
 
           <aside className="article-sidebar" aria-label="Project article sidebar">
@@ -335,6 +339,33 @@ interface TocHeading {
   text: string;
 }
 
+function removeDuplicateTitleHeading(markdown: string, title: string) {
+  const normalizedTitle = normalizeHeadingText(title);
+  const lines = markdown.split("\n");
+  const firstContentLineIndex = lines.findIndex((line) => line.trim().length > 0);
+
+  if (firstContentLineIndex === -1) {
+    return markdown;
+  }
+
+  const firstContentLine = lines[firstContentLineIndex];
+  const match = /^#\s+(.+)$/.exec(firstContentLine.trim());
+
+  if (!match || normalizeHeadingText(match[1]) !== normalizedTitle) {
+    return markdown;
+  }
+
+  const nextLineIndex = firstContentLineIndex + 1;
+
+  if (lines[nextLineIndex]?.trim() === "") {
+    lines.splice(firstContentLineIndex, 2);
+  } else {
+    lines.splice(firstContentLineIndex, 1);
+  }
+
+  return lines.join("\n").trimStart();
+}
+
 function extractTocHeadings(markdown: string): TocHeading[] {
   const headings: TocHeading[] = [];
   const seen = new Map<string, number>();
@@ -367,6 +398,10 @@ function extractTocHeadings(markdown: string): TocHeading[] {
   });
 
   return headings;
+}
+
+function normalizeHeadingText(value: string) {
+  return cleanupHeadingText(value).toLowerCase().replace(/\s+/g, " ");
 }
 
 function cleanupHeadingText(value: string) {
