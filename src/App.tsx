@@ -208,7 +208,7 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
         <header className="article-header">
           <p className="eyebrow">{project.category}</p>
           <h1>{project.title}</h1>
-          <p>{project.summary}</p>
+          <p className="article-summary-text">{project.summary}</p>
           <dl className="article-meta-inline">
             <div>
               <dt>상태</dt>
@@ -223,18 +223,34 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
               <dd>{project.entryDocumentPath}</dd>
             </div>
           </dl>
+          <div className="article-meta-group" aria-label="Project tech stack">
+            <span className="article-meta-label">기술 스택</span>
+            <div className="article-meta-tags">
+              {project.stacks.map((stack) => (
+                <span key={stack}>{stack}</span>
+              ))}
+            </div>
+          </div>
+          <div className="article-meta-group" aria-label="Project links">
+            <span className="article-meta-label">문서 링크</span>
+            <div className="article-meta-links">
+              {externalLinks.map((link) => (
+                <a
+                  className={`link-${link.type}`}
+                  href={link.url}
+                  key={`${link.type}-${link.label}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
         </header>
 
         <section className="markdown-card">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.entryDocumentMarkdown}</ReactMarkdown>
-        </section>
-
-        <section className="article-links">
-          {externalLinks.map((link) => (
-            <a className={`link-${link.type}`} key={`${link.type}-${link.label}`} href={link.url} target="_blank" rel="noreferrer">
-              {link.label}
-            </a>
-          ))}
         </section>
       </article>
     </main>
