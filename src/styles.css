@@ -576,6 +576,44 @@ a {
   background: #e7eaed;
 }
 
+.sidebar-meta-card {
+  display: grid;
+  gap: 14px;
+  padding: 12px;
+}
+
+.sidebar-meta-card h2 {
+  margin: 0 0 8px;
+  color: #202428;
+  font-size: 14px;
+}
+
+.sidebar-chip-list,
+.sidebar-link-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.sidebar-chip-list span,
+.sidebar-link-list a {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  border: 1px solid #cfd5db;
+  border-radius: 999px;
+  background: #f4f6f8;
+  padding: 0 9px;
+  color: #35404a;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.sidebar-link-list a:hover {
+  background: #e7eaed;
+}
+
 .article-section,
 .article-grid > div {
   border: 1px solid #d2d7dc;

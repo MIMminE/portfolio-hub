@@ -214,30 +214,6 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
               <dd>{project.entryDocumentPath}</dd>
             </div>
           </dl>
-          <div className="article-meta-group" aria-label="Project tech stack">
-            <span className="article-meta-label">기술 스택</span>
-            <div className="article-meta-tags">
-              {project.stacks.map((stack) => (
-                <span key={stack}>{stack}</span>
-              ))}
-            </div>
-          </div>
-          <div className="article-meta-group" aria-label="Project links">
-            <span className="article-meta-label">문서 링크</span>
-            <div className="article-meta-links">
-              {externalLinks.map((link) => (
-                <a
-                  className={`link-${link.type}`}
-                  href={link.url}
-                  key={`${link.type}-${link.label}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          </div>
         </header>
 
         <div className="article-content-layout">
@@ -248,6 +224,32 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
           <aside className="article-sidebar" aria-label="Project article sidebar">
             <section className="article-sidebar-card">
               <DeveloperProfilePanel />
+            </section>
+            <section className="article-sidebar-card sidebar-meta-card" aria-label="Project metadata">
+              <div>
+                <h2>기술 스택</h2>
+                <div className="sidebar-chip-list">
+                  {project.stacks.map((stack) => (
+                    <span key={stack}>{stack}</span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h2>문서 링크</h2>
+                <div className="sidebar-link-list">
+                  {externalLinks.map((link) => (
+                    <a
+                      className={`link-${link.type}`}
+                      href={link.url}
+                      key={`${link.type}-${link.label}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
             </section>
             {tocHeadings.length > 0 ? (
               <section className="article-sidebar-card toc-sidebar-card">
