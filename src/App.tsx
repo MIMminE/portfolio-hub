@@ -182,8 +182,8 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
   return (
     <main className="article-shell">
       <nav className="top-nav article-nav" aria-label="Project article navigation">
-        <a className="brand-mark" href="/">
-          Engineering Portfolio
+        <a className="brand-mark article-title-mark" href="/">
+          {project.title}
         </a>
         <div>
           <a href="/" target="_self">
