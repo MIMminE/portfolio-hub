@@ -87,10 +87,53 @@ portfolio-feed/
 1. 프로젝트 내부 README/docs/이미지를 기반으로 `portfolio-package` 디렉터리를 만든다.
 2. `manifest.json`, `article.md`, `images/`를 패키지 규격에 맞춰 생성한다.
 3. S3의 `portfolio-feed/{projectId}/` 경로에 업로드한다.
-4. `portfolio-feed/index.json`에 해당 프로젝트의 `manifestUrl`을 추가하거나 갱신한다.
+
+각 프로젝트는 자기 패키지 디렉터리만 업로드한다. 전체 목록인 `portfolio-feed/index.json`은 허브 레포가 `config/portfolio-feed-projects.json`을 기준으로 생성한다.
 
 ## Hub Contract
 
 허브는 `VITE_PORTFOLIO_FEED_URL` 또는 기본값 `/portfolio-feed/index.json`을 읽는다. 이후 각 manifest와 article을 fetch해서 카드와 상세 게시물을 만든다.
 
 로컬 검증용 mock bucket은 `public/portfolio-feed`에 둔다.
+
+## Option 1: Hub-Owned Index
+
+이 프로젝트는 허브가 전체 index를 관리하는 방식을 사용한다.
+
+```text
+project repo CI
+  -> s3://bucket/portfolio-feed/{projectId}/manifest.json
+  -> s3://bucket/portfolio-feed/{projectId}/article.md
+  -> s3://bucket/portfolio-feed/{projectId}/images/*
+
+portfolio-hub CI
+  -> config/portfolio-feed-projects.json 읽기
+  -> s3://bucket/portfolio-feed/index.json 생성/업로드
+  -> hub static site build/deploy
+```
+
+허브 레포의 `config/portfolio-feed-projects.json` 예시는 아래와 같다.
+
+```json
+{
+  "version": "1.0",
+  "projects": [
+    {
+      "id": "warehouse-ops-suite",
+      "packagePath": "warehouse-ops-suite/manifest.json"
+    }
+  ]
+}
+```
+
+`portfolio-feed/index.json` 생성 명령:
+
+```bash
+pnpm feed:index
+```
+
+절대 URL 기반 index가 필요하면 `PORTFOLIO_FEED_BASE_URL`을 지정한다.
+
+```bash
+PORTFOLIO_FEED_BASE_URL=https://cdn.example.com/portfolio-feed pnpm feed:index
+```

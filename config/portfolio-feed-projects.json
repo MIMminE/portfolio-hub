@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "projects": [
+    {
+      "id": "warehouse-ops-suite",
+      "packagePath": "warehouse-ops-suite/manifest.json"
+    },
+    {
+      "id": "settlement-admin-api",
+      "packagePath": "settlement-admin-api/manifest.json"
+    },
+    {
+      "id": "kotlin-commerce-core",
+      "packagePath": "kotlin-commerce-core/manifest.json"
+    },
+    {
+      "id": "stock-lock-benchmark",
+      "packagePath": "stock-lock-benchmark/manifest.json"
+    },
+    {
+      "id": "order-service-iac-cicd",
+      "packagePath": "order-service-iac-cicd/manifest.json"
+    },
+    {
+      "id": "maternity-care-commerce",
+      "packagePath": "maternity-care-commerce/manifest.json"
+    }
+  ]
+}
