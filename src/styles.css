@@ -49,16 +49,27 @@ a {
   text-decoration: none;
 }
 
-.article-title-mark {
-  overflow: hidden;
-  max-width: min(560px, 56vw);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .top-nav div {
   display: flex;
   gap: 6px;
+}
+
+.top-nav .article-nav-title {
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.article-nav-title span {
+  overflow: hidden;
+  max-width: min(430px, 42vw);
+  border-left: 1px solid #cfd5db;
+  padding-left: 10px;
+  color: #6a747d;
+  font-size: 13px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .top-nav a {
