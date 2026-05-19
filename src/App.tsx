@@ -189,6 +189,9 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
           <a href="/" target="_self">
             목록
           </a>
+          <a href="https://github.com/MIMminE" target="_blank" rel="noreferrer">
+            Profile
+          </a>
           <a href={`https://github.com/${project.repo}`} target="_blank" rel="noreferrer">
             GitHub
           </a>
@@ -222,9 +225,6 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
           </section>
 
           <aside className="article-sidebar" aria-label="Project article sidebar">
-            <section className="article-sidebar-card">
-              <DeveloperProfilePanel />
-            </section>
             <section className="article-sidebar-card sidebar-meta-card" aria-label="Project metadata">
               <div>
                 <h2>기술 스택</h2>
