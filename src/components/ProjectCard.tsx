@@ -43,23 +43,26 @@ export function ProjectCard({ project, status }: ProjectCardProps) {
         </dl>
 
         <div className="stack-list" aria-label={`${project.title} tech stack`}>
-          {project.stacks.slice(0, 7).map((stack) => (
+          {project.stacks.slice(0, 5).map((stack) => (
             <span key={stack}>{stack}</span>
           ))}
         </div>
 
-        <div className="project-detail">
-          <h5>문제</h5>
-          <p>{project.problem}</p>
-          <h5>해결</h5>
-          <p>{project.solution}</p>
-        </div>
-
-        <ul className="highlight-list">
-          {project.highlights.slice(0, 4).map((highlight) => (
-            <li key={highlight}>{highlight}</li>
-          ))}
-        </ul>
+        <details className="project-detail">
+          <summary>핵심 설계 보기</summary>
+          <div>
+            <h5>문제</h5>
+            <p>{project.problem}</p>
+            <h5>해결</h5>
+            <p>{project.solution}</p>
+            <h5>면접 포인트</h5>
+            <ul>
+              {project.interviewPoints.slice(0, 3).map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </div>
+        </details>
 
         <div className="link-row">
           {links.map((link) => (
