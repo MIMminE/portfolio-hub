@@ -15,7 +15,7 @@
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-20T18:48:00.059Z"
+    "syncedAt": "2026-05-21T18:38:42.261Z"
   },
   {
     "id": "settlement-admin-api",
@@ -33,7 +33,7 @@
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-20T18:48:00.145Z"
+    "syncedAt": "2026-05-21T18:38:42.350Z"
   },
   {
     "id": "kotlin-commerce-core",
@@ -41,17 +41,17 @@
     "htmlUrl": "https://github.com/MIMminE/kotlin-commerce-core",
     "description": null,
     "defaultBranch": "main",
-    "pushedAt": "2026-05-20T14:21:04Z",
-    "updatedAt": "2026-05-20T12:38:55Z",
-    "latestCommitSha": "0a8e2836761b6de7206c9951cb7e3e6ec9dc392d",
-    "latestCommitMessage": "test(release): 스모크 실패 로그 출력 보강",
+    "pushedAt": "2026-05-21T11:25:59Z",
+    "updatedAt": "2026-05-21T11:26:04Z",
+    "latestCommitSha": "f1bf6b5bb2f05a2b414d0b347a4a75fe30bc1e5a",
+    "latestCommitMessage": "docs(blog): 커머스 MSA 게시물 이미지와 요약 보강",
     "latestReleaseTag": "v0.1.0",
     "latestReleaseUrl": "https://github.com/MIMminE/kotlin-commerce-core/releases/tag/v0.1.0",
     "latestReleaseName": "v0.1.0",
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-20T18:48:00.146Z"
+    "syncedAt": "2026-05-21T18:38:42.351Z"
   },
   {
     "id": "stock-lock-benchmark",
@@ -59,17 +59,17 @@
     "htmlUrl": "https://github.com/MIMminE/stock-lock-benchmark",
     "description": null,
     "defaultBranch": "main",
-    "pushedAt": "2026-05-20T14:21:00Z",
-    "updatedAt": "2026-05-20T13:09:54Z",
-    "latestCommitSha": "b0c206d1a1631067cfc6d623515615a78ab73db3",
-    "latestCommitMessage": "test(release): 외부 엔드포인트 스모크 재시도 보강",
+    "pushedAt": "2026-05-21T11:25:32Z",
+    "updatedAt": "2026-05-21T11:25:36Z",
+    "latestCommitSha": "c7f60c17d59e4d95796a4c8c8a7f75347f4f3a09",
+    "latestCommitMessage": "docs(blog): 벤치마크 게시물 이미지와 설명 보강",
     "latestReleaseTag": "v0.1.0",
     "latestReleaseUrl": "https://github.com/MIMminE/stock-lock-benchmark/releases/tag/v0.1.0",
     "latestReleaseName": "v0.1.0",
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-20T18:48:00.147Z"
+    "syncedAt": "2026-05-21T18:38:42.352Z"
   },
   {
     "id": "order-service-iac-cicd",
@@ -87,7 +87,7 @@
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-20T18:48:00.148Z"
+    "syncedAt": "2026-05-21T18:38:42.353Z"
   },
   {
     "id": "maternity-care-commerce",
@@ -105,6 +105,6 @@
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-20T18:48:00.149Z"
+    "syncedAt": "2026-05-21T18:38:42.354Z"
   }
 ]
