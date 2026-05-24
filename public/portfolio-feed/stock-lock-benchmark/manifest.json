@@ -4,7 +4,7 @@
   "subtitle": "재고 핫스팟 락 전략 성능 비교",
   "category": "성능/동시성 실험형",
   "status": "Portfolio Ready",
-  "summary": "단일 재고 row에 주문 요청이 몰리는 상황에서 Optimistic Lock과 Pessimistic Lock의 처리량, 지연시간, 재시도 비용을 비교했습니다.",
+  "summary": "단일 재고 row에 주문 요청이 몰리는 상황에서 Optimistic Lock과 Pessimistic Lock의 처리량, 지연시간, 재시도 비용을 비교한 실험형 포트폴리오입니다.",
   "stacks": [
     "Java",
     "Spring Boot",
@@ -16,23 +16,19 @@
   ],
   "repoUrl": "https://github.com/MIMminE/stock-lock-benchmark",
   "article": "./article.md",
-  "coverImage": "https://raw.githubusercontent.com/MIMminE/stock-lock-benchmark/master/docs/images/benchmark-console.png",
+  "coverImage": "./images/cover.png",
   "coverAlt": "Stock Lock Benchmark 실험 콘솔",
-  "updatedAt": "2026-05-19T07:10:40.577Z",
-  "localDemo": {
-    "label": "Benchmark Console",
-    "url": "http://localhost:18081"
-  },
   "links": [
     {
-      "label": "README",
-      "url": "https://github.com/MIMminE/stock-lock-benchmark/blob/master/README.md",
+      "label": "Benchmark Report",
+      "url": "./documents/benchmark-report.md",
       "type": "docs"
     },
     {
       "label": "Runbook",
-      "url": "https://github.com/MIMminE/stock-lock-benchmark/blob/master/docs/runbook.md",
+      "url": "./documents/runbook.md",
       "type": "manual"
     }
-  ]
+  ],
+  "updatedAt": "2026-05-21T11:03:54.288Z"
 }

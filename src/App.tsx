@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { isValidElement, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import generatedStatuses from "./data/generated-status.json";
 import generatedProjects from "./data/generated-projects.json";
@@ -11,7 +12,40 @@ import type { GeneratedProjectStatus, Project } from "./types/project";
 const statuses = generatedStatuses as GeneratedProjectStatus[];
 const syncedProjects = generatedProjects as Project[];
 
-const fallbackProjects = syncedProjects.length > 0 ? syncedProjects : projects;
+const hiddenProjectIds = new Set(["settlement-admin-api", "order-service-iac-cicd"]);
+const featuredProjectOrder = [
+  "maternity-care-commerce",
+  "warehouse-ops-suite",
+  "stock-lock-benchmark",
+  "kotlin-commerce-core",
+  "devpilot"
+];
+
+const projectOrderById = new Map(featuredProjectOrder.map((id, index) => [id, index]));
+
+const curateProjects = (projectList: Project[]) => (
+  projectList
+    .filter((project) => !hiddenProjectIds.has(project.id))
+    .sort((a, b) => (
+      (projectOrderById.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+      (projectOrderById.get(b.id) ?? Number.MAX_SAFE_INTEGER)
+    ))
+);
+
+const fallbackProjects = curateProjects(syncedProjects.length > 0 ? syncedProjects : projects);
+
+const markdownComponents: Components = {
+  pre({ children }) {
+    const child = isValidElement<{ className?: string; children?: unknown }>(children) ? children : null;
+    const className = child?.props.className ?? "";
+
+    if (className.includes("language-mermaid")) {
+      return <MermaidDiagram source={reactNodeToText(child?.props.children)} />;
+    }
+
+    return <pre>{children}</pre>;
+  }
+};
 
 export function App() {
   const [displayProjects, setDisplayProjects] = useState<Project[]>(fallbackProjects);
@@ -26,7 +60,7 @@ export function App() {
     loadPortfolioFeed()
       .then((feedProjects) => {
         if (!ignore && feedProjects.length > 0) {
-          setDisplayProjects(feedProjects);
+          setDisplayProjects(curateProjects(feedProjects));
           setFeedError(null);
         }
       })
@@ -236,7 +270,9 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
 
         <div className="article-content-layout">
           <section className="markdown-card">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{articleMarkdown}</ReactMarkdown>
+            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+              {articleMarkdown}
+            </ReactMarkdown>
           </section>
 
           <aside className="article-sidebar" aria-label="Project article sidebar">
@@ -272,6 +308,87 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
         </div>
       </article>
     </main>
+  );
+}
+
+function MermaidDiagram({ source }: { source: string }) {
+  const diagram = parseMermaidFlowchart(source);
+
+  if (!diagram) {
+    return (
+      <pre>
+        <code className="language-mermaid">{source}</code>
+      </pre>
+    );
+  }
+
+  const nodeWidth = 132;
+  const nodeHeight = 54;
+  const gap = 46;
+  const paddingX = 28;
+  const paddingY = 28;
+  const width = paddingX * 2 + diagram.nodes.length * nodeWidth + Math.max(diagram.nodes.length - 1, 0) * gap;
+  const height = 128;
+  const y = paddingY + 12;
+  const positions = new Map(
+    diagram.nodes.map((node, index) => [
+      node.id,
+      {
+        x: paddingX + index * (nodeWidth + gap),
+        y
+      }
+    ])
+  );
+
+  return (
+    <figure className="mermaid-diagram" aria-label="Architecture flow diagram">
+      <svg role="img" viewBox={`0 0 ${width} ${height}`}>
+        <defs>
+          <marker id="arrowhead" markerHeight="8" markerWidth="8" orient="auto" refX="7" refY="4">
+            <path d="M0,0 L8,4 L0,8 Z" />
+          </marker>
+        </defs>
+        {diagram.edges.map((edge) => {
+          const from = positions.get(edge.from);
+          const to = positions.get(edge.to);
+
+          if (!from || !to) {
+            return null;
+          }
+
+          return (
+            <line
+              key={`${edge.from}-${edge.to}`}
+              markerEnd="url(#arrowhead)"
+              x1={from.x + nodeWidth}
+              x2={to.x}
+              y1={from.y + nodeHeight / 2}
+              y2={to.y + nodeHeight / 2}
+            />
+          );
+        })}
+        {diagram.nodes.map((node) => {
+          const position = positions.get(node.id);
+
+          if (!position) {
+            return null;
+          }
+
+          return (
+            <g key={node.id}>
+              <rect height={nodeHeight} rx="8" width={nodeWidth} x={position.x} y={position.y} />
+              <text x={position.x + nodeWidth / 2} y={position.y + nodeHeight / 2}>
+                {splitDiagramLabel(node.label).map((line, index, lines) => (
+                  <tspan dy={index === 0 ? `${-(lines.length - 1) * 8}px` : "16px"} key={line} x={position.x + nodeWidth / 2}>
+                    {line}
+                  </tspan>
+                ))}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </figure>
   );
 }
 
@@ -387,6 +504,83 @@ function DeveloperProfilePanel() {
       </a>
     </div>
   );
+}
+
+interface DiagramNode {
+  id: string;
+  label: string;
+}
+
+interface DiagramEdge {
+  from: string;
+  to: string;
+}
+
+function parseMermaidFlowchart(source: string): { nodes: DiagramNode[]; edges: DiagramEdge[] } | null {
+  const lines = source
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("%%"));
+
+  if (!lines[0]?.startsWith("flowchart")) {
+    return null;
+  }
+
+  const nodes = new Map<string, DiagramNode>();
+  const edges: DiagramEdge[] = [];
+  const edgePattern =
+    /^([A-Za-z0-9_]+)(?:\["([^"]+)"\]|\[([^\]]+)\])?\s*-->\s*([A-Za-z0-9_]+)(?:\["([^"]+)"\]|\[([^\]]+)\])?$/;
+
+  for (const line of lines.slice(1)) {
+    const match = edgePattern.exec(line);
+
+    if (!match) {
+      return null;
+    }
+
+    const from = match[1];
+    const fromLabel = match[2] ?? match[3] ?? from;
+    const to = match[4];
+    const toLabel = match[5] ?? match[6] ?? to;
+
+    if (!nodes.has(from)) {
+      nodes.set(from, { id: from, label: cleanupDiagramLabel(fromLabel) });
+    }
+
+    if (!nodes.has(to)) {
+      nodes.set(to, { id: to, label: cleanupDiagramLabel(toLabel) });
+    }
+
+    edges.push({ from, to });
+  }
+
+  return {
+    nodes: Array.from(nodes.values()),
+    edges
+  };
+}
+
+function cleanupDiagramLabel(label: string) {
+  return label.replace(/<br\s*\/?>/gi, "\n").replace(/["']/g, "").trim();
+}
+
+function splitDiagramLabel(label: string) {
+  return label
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function reactNodeToText(node: unknown): string {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(reactNodeToText).join("");
+  }
+
+  return "";
 }
 
 interface TocHeading {

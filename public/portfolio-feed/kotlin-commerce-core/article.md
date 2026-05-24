@@ -1,235 +1,160 @@
 # Kotlin Commerce Core
 
-Kotlin과 Spring Boot로 구현한 이벤트 기반 커머스 마이크로서비스 프로젝트입니다. 주문 생성, 재고 예약, 결제 처리, 상품 재고 동기화까지 이어지는 흐름을 Kafka 이벤트로 연결하고, Transactional Outbox, Lease, Idempotency, Redis 캐시를 적용해 분산 환경에서 자주 발생하는 중복 처리와 메시지 유실 문제를 다룹니다.
+커머스 백엔드를 마이크로서비스로 나누면 가장 먼저 부딪히는 문제는 "서비스를 어떻게 나눌까"가 아닙니다. 주문은 저장됐는데 메시지 발행에 실패하면 어떻게 할지, 같은 이벤트가 두 번 들어오면 어떻게 할지, 여러 인스턴스의 publisher가 같은 outbox 레코드를 동시에 집어가면 어떻게 할지 같은 신뢰성 문제가 먼저 나타납니다.
 
-> 이직 포트폴리오 관점에서는 “단순 CRUD 백엔드”가 아니라, 주문 도메인에서 필요한 신뢰성 패턴을 작은 MSA로 직접 구현한 프로젝트입니다.
+Kotlin Commerce Core는 주문, 재고, 결제, 상품 서비스를 나누고 Kafka 이벤트로 연결한 커머스 백엔드 포트폴리오입니다. 단순히 서비스를 여러 개 띄우는 것보다, Transactional Outbox, Lease, Idempotency, Redis 캐시처럼 분산 환경에서 필요한 패턴을 직접 구현하는 데 초점을 뒀습니다.
 
-<p align="center">
-  <img src="portfolio/web-client-preview.png" alt="Commerce client preview" width="900" />
-</p>
+## 프로젝트 목표
 
-## Highlights
+이 프로젝트에서 보여주고 싶었던 것은 "MSA 구조를 만들었다"가 아니라 "분산 환경에서 데이터 정합성과 메시지 신뢰성을 어떻게 다뤘는가"입니다.
 
-- **주문-재고-결제-상품 서비스 분리**: `order-service`, `inventory-service`, `payment-service`, `product-service`를 독립 서비스로 구성
-- **Transactional Outbox**: 주문 저장과 이벤트 발행 요청을 같은 DB 트랜잭션에 기록해 메시지 유실 위험 감소
-- **Lease 기반 Publisher**: `SKIP LOCKED`와 lease owner/lease until을 사용해 다중 퍼블리셔 환경에서 중복 발행 방지
-- **Idempotency 처리**: 주문 생성과 상품 등록 요청에 멱등성 키를 적용해 재시도 상황을 안전하게 처리
-- **Kafka 이벤트 흐름**: 서비스 간 직접 강결합 대신 이벤트 기반으로 재고 예약, 결제, 상품 재고 반영 수행
-- **Redis 캐시**: 상품 조회와 재고 표시를 빠르게 제공하기 위한 캐시 계층 구성
-- **웹 클라이언트 추가**: 백엔드 흐름을 브라우저에서 확인할 수 있도록 Vite 기반 클라이언트 화면 제공
+핵심 목표는 세 가지였습니다.
 
-## Tech Stack
-
-| 영역 | 사용 기술 |
+| 목표 | 설명 |
 | --- | --- |
-| Language | Kotlin |
-| Backend | Spring Boot, Spring Data JPA |
-| Messaging | Kafka, Zookeeper |
-| Database | PostgreSQL |
-| Cache | Redis |
-| Test | JUnit, Mockito, Testcontainers |
-| Infra | Docker Compose, GitHub Actions |
-| Web Client | Vite, Vanilla JavaScript |
+| 주문 이벤트 흐름 구현 | 주문 생성 후 재고 예약, 결제 처리, 주문 상태 반영까지 이벤트로 연결 |
+| 메시지 신뢰성 확보 | DB 저장과 이벤트 발행 사이의 간극을 Transactional Outbox로 보완 |
+| 중복 처리 방어 | Idempotency-Key와 eventId 기반 멱등 처리 적용 |
 
-## System Overview
+## 한눈에 보는 구현 포인트
 
-<p align="center">
-  <img src="portfolio/system-overview.svg" alt="Commerce MSA system overview" width="900" />
-</p>
-
-## Web Client
-
-포트폴리오 확인자가 백엔드 API와 이벤트 흐름을 빠르게 확인할 수 있도록 웹 클라이언트를 추가했습니다. 상품 조회, 상품 등록, 주문 생성, 최근 주문 조회를 한 화면에서 실행할 수 있습니다.
-
-```bash
-# 1. 백엔드 전체 스택 실행
-docker compose up -d --build
-
-# 2. 웹 클라이언트 실행
-cd demo-ui
-npm install
-npm run dev
-```
-
-- UI: `http://localhost:5183`
-- Product API: `http://localhost:8080`
-- Order API: `http://localhost:8083`
-- 개발용 API Key: `X-API-Key: dev-api-key-5678`
-
-## UI Planning
-
-이 UI는 프론트엔드 자체를 과하게 보여주기보다, 백엔드 포트폴리오를 보는 사람이 주문 흐름을 직접 눌러볼 수 있게 만드는 데 초점을 맞췄습니다. 그래서 랜딩 페이지나 소개 문구를 크게 두지 않고, 첫 화면에서 바로 상품 탐색과 주문 액션이 보이도록 구성했습니다.
-
-<p align="center">
-  <img src="portfolio/ui-main.png" alt="Commerce client main screen" width="520" />
-</p>
-
-### 1. 첫 화면은 상품 탐색 중심
-
-- 상단에는 브랜드, 검색, 주요 이동 메뉴, 서비스 상태만 배치했습니다.
-- 큰 프로모션 배너는 제거하고 카테고리 필터와 상품 목록을 바로 보여줘 실제 클라이언트 화면에 가깝게 구성했습니다.
-- 색상은 무채색 기반으로 낮추고, 버튼과 선택 상태만 진한 네이비로 처리해 포트폴리오 문서 안에서도 튀지 않게 맞췄습니다.
-
-<p align="center">
-  <img src="portfolio/ui-catalog.png" alt="Product catalog UI" width="520" />
-</p>
-
-### 2. 상품 카드는 재고와 주문 액션을 빠르게 확인
-
-- 상품명, 카테고리, 가격, 재고, 담기 버튼을 한 카드 안에 압축했습니다.
-- 실제 상품 이미지가 없는 백엔드 프로젝트 특성을 고려해, 과한 이미지 대신 단순한 상품 썸네일 스타일을 사용했습니다.
-- 카드 높이를 낮춰 한 화면에서 여러 상품을 비교할 수 있게 했습니다.
-
-<p align="center">
-  <img src="portfolio/ui-checkout.png" alt="Checkout and recent orders UI" width="520" />
-</p>
-
-### 3. 주문 생성과 결과 확인을 같은 흐름에 배치
-
-- 주문 폼은 고객 ID, 상품, 수량만 입력하면 바로 요청할 수 있게 최소화했습니다.
-- 결제 예정 금액을 즉시 계산해 주문 요청 전에 확인할 수 있게 했습니다.
-- 최근 주문 목록을 바로 아래에 두어 `POST /api/orders` 이후 `GET /api/orders`로 상태가 이어지는 흐름을 확인할 수 있습니다.
-
-## Service Responsibilities
-
-| 서비스 | 책임 |
+| 포인트 | 구현 방향 |
 | --- | --- |
-| `order-service` | 주문 생성, 주문 조회, 멱등성 처리, Outbox 이벤트 기록 |
-| `inventory-service` | 재고 예약, 확정, 해제 처리 및 예약 결과 이벤트 발행 |
-| `payment-service` | 결제 생성, 승인, 해제 흐름 처리 및 결제 결과 이벤트 발행 |
-| `product-service` | 상품 등록/조회, 재고 이벤트 수신, Redis 캐시 갱신 |
+| 주문 생성 안정성 | Idempotency-Key로 중복 주문 생성 방어 |
+| 이벤트 신뢰성 | 주문 저장 트랜잭션 안에서 Outbox 레코드 저장 |
+| Publisher 경합 제어 | leaseOwner, leaseUntil로 발행 대상 선점 |
+| Consumer 멱등성 | eventId 기반 처리 이력 저장 |
+| 로컬 재현성 | Docker Compose로 Kafka, Redis, PostgreSQL, 4개 서비스 실행 |
 
-## Order Flow
+## 시스템 개요
 
-주문 생성 요청은 즉시 모든 서비스를 동기 호출하지 않고, 주문 저장 후 Outbox에 이벤트를 기록합니다. 이후 Publisher가 Kafka로 이벤트를 발행하고, 재고/결제/상품 서비스가 각자 이벤트를 소비해 상태를 갱신합니다.
+![System overview](./images/02-system-overview.svg)
 
-<p align="center">
-  <img src="portfolio/order-flow.svg" alt="Order event flow" width="900" />
-</p>
+서비스는 주문 생성 이후 재고 예약, 결제 처리, 상품 캐시 갱신까지 이벤트 기반으로 이어집니다.
 
-1. 클라이언트가 `POST /api/orders`로 주문 생성 요청
-2. `order-service`가 주문과 Outbox 레코드를 같은 트랜잭션에 저장
-3. Outbox Publisher가 `PENDING` 이벤트를 lease로 선점
-4. Kafka에 재고 예약 요청 이벤트 발행
-5. `inventory-service`가 재고 예약 처리 후 결과 이벤트 발행
-6. `payment-service`가 결제 처리 후 결과 이벤트 발행
-7. `product-service`가 재고 관련 이벤트를 수신해 Redis 캐시 갱신
+| Service | Responsibility |
+| --- | --- |
+| `order-service` | 주문 생성, Idempotency-Key 처리, Outbox 기록 |
+| `inventory-service` | 재고 예약, 확정, 해제 |
+| `payment-service` | 결제 승인/실패 처리 |
+| `product-service` | 상품 조회와 Redis 캐시 |
+
+이 구조에서 각 서비스는 자신의 DB를 소유합니다. 다른 서비스의 테이블을 직접 수정하지 않고, 이벤트를 통해 상태 변화를 전달합니다.
+
+## 웹 클라이언트를 붙인 이유
+
+![Web client preview](./images/01-web-client-preview.png)
+
+백엔드 아키텍처 프로젝트는 API 호출 예시만 있으면 읽는 사람이 흐름을 상상해야 합니다. 그래서 주문 흐름을 직접 확인할 수 있는 브라우저 웹 클라이언트를 붙였습니다.
+
+화면에서는 상품을 조회하고, 주문을 생성하고, 최근 주문을 확인할 수 있습니다. 이 UI는 화려한 프론트엔드가 목적이 아니라, 주문 이벤트 흐름을 눈으로 따라갈 수 있게 하는 장치입니다.
+
+## 주문 이벤트 흐름
+
+![Order flow](./images/03-order-flow.svg)
+
+주문 생성 흐름은 다음과 같습니다.
+
+1. 클라이언트가 `POST /orders`를 호출합니다.
+2. `order-service`는 `Idempotency-Key`를 확인합니다.
+3. 주문 데이터를 저장하면서 같은 트랜잭션에 Outbox 레코드를 기록합니다.
+4. Outbox Publisher가 발행 가능한 레코드를 선점합니다.
+5. Kafka로 주문 생성 이벤트를 발행합니다.
+6. `inventory-service`와 `payment-service`가 이벤트를 소비합니다.
+7. 처리 결과 이벤트가 다시 주문 상태에 반영됩니다.
+
+여기서 중요한 점은 주문 저장과 Kafka 발행을 하나의 로컬 트랜잭션으로 묶을 수 없다는 것입니다. 그래서 주문 저장 시점에는 Kafka에 직접 보내지 않고, Outbox 테이블에 먼저 기록합니다.
 
 ## Transactional Outbox
 
-Outbox는 이 프로젝트의 핵심 구현 포인트입니다. 주문 DB 트랜잭션과 Kafka 발행을 직접 하나의 원자적 작업으로 묶을 수 없기 때문에, 우선 DB에 발행할 이벤트를 기록하고 별도 Publisher가 안전하게 발행합니다.
+![Outbox flow](./images/04-outbox-flow.svg)
 
-<p align="center">
-  <img src="portfolio/outbox-flow.svg" alt="Transactional outbox flow" width="900" />
-</p>
-
-### Publisher Claim SQL
-
-```sql
-WITH cte AS (
-    SELECT id
-    FROM outbox
-    WHERE status = 'PENDING'
-      AND (lease_until IS NULL OR lease_until < now())
-    ORDER BY created_at
-    LIMIT 50
-    FOR UPDATE SKIP LOCKED
-)
-UPDATE outbox
-SET lease_owner = 'publisher-1',
-    lease_until = now() + interval '30 seconds',
-    status = 'SENDING'
-WHERE id IN (SELECT id FROM cte)
-RETURNING id, event_id, payload;
-```
-
-### Why It Matters
-
-- DB 저장은 성공했지만 Kafka 발행이 실패하는 케이스를 복구 가능하게 만듭니다.
-- 여러 Publisher가 동시에 실행되어도 같은 Outbox 레코드를 중복 처리하지 않도록 lease로 보호합니다.
-- 실패 횟수, 재시도 시각, 마지막 에러를 기록해 운영 관점의 추적성을 확보합니다.
-
-## API Summary
-
-### Order
-
-```http
-POST /api/orders
-GET /api/orders?userId={userId}&page={page}&size={size}
-```
-
-```json
-{
-  "idempotencyKey": "9a38df8e-8f42-4b21-94db-3debc5c7f621",
-  "userId": "user-123",
-  "items": [
-    {
-      "productId": "product-id",
-      "qty": 2,
-      "unitPriceAmount": 199900,
-      "unitPriceCurrency": "KRW"
-    }
-  ],
-  "totalAmount": 399800,
-  "currency": "KRW"
-}
-```
-
-### Product
-
-```http
-POST /api/products
-GET /api/products/search/all
-GET /api/products/search/{productId}
-```
-
-상품 등록은 `Idempotency-Key` 헤더를 사용하고, 로컬 실행 환경에서는 `X-API-Key` 헤더가 필요합니다.
-
-## Local Run
-
-```bash
-docker compose up -d --build
-```
-
-서비스 포트는 아래와 같습니다.
-
-| 서비스 | 포트 |
-| --- | --- |
-| product-service | `8080` |
-| inventory-service | `8081` |
-| payment-service | `8082` |
-| order-service | `8083` |
-| web client | `5183` |
-
-## CI
-
-GitHub Actions에서 각 서비스의 테스트를 실행하고 테스트 리포트를 업로드합니다.
+Transactional Outbox는 DB 저장과 메시지 발행 사이의 불일치를 줄이기 위한 패턴입니다.
 
 ```text
-.github/workflows/ci.yml
+주문 저장 트랜잭션
+-> orders insert
+-> outbox_events insert
+-> commit
+
+별도 publisher
+-> outbox_events 조회
+-> Kafka 발행
+-> published 처리
 ```
 
-최근 정리에서 테스트 실패를 무시하던 흐름을 제거해, 서비스 테스트 실패가 CI 결과에 정확히 반영되도록 수정했습니다.
+이렇게 하면 주문은 저장됐는데 이벤트 기록이 없는 상태를 피할 수 있습니다. Kafka 발행이 실패하더라도 Outbox 레코드는 남아 있으므로 재시도할 수 있습니다.
 
-## Portfolio Notes
+## Lease로 중복 발행 줄이기
 
-이 프로젝트에서 어필하고 싶은 지점은 다음과 같습니다.
+Outbox Publisher가 하나만 실행된다면 단순 조회 후 발행도 가능합니다. 하지만 실제 운영에서는 여러 인스턴스가 동시에 떠 있을 수 있습니다. 그러면 여러 publisher가 같은 outbox 레코드를 집어가 중복 발행할 위험이 있습니다.
 
-- 분산 트랜잭션을 단순화하기 위해 Outbox와 이벤트 기반 흐름을 선택한 점
-- lease와 `SKIP LOCKED`를 사용해 Publisher 병렬 처리 안정성을 고려한 점
-- 멱등성 키로 클라이언트 재시도와 중복 요청을 다룬 점
-- Redis 캐시를 상품 조회 흐름에 연결해 읽기 성능을 고려한 점
-- Docker Compose와 웹 클라이언트로 면접자가 로컬에서 빠르게 흐름을 확인할 수 있게 만든 점
-
-## Repository Structure
+그래서 claim-and-lock 방식의 lease를 적용했습니다.
 
 ```text
-.
-├── demo-ui/              # 포트폴리오 확인용 웹 클라이언트
-├── inventory-service/    # 재고 예약/확정/해제 이벤트 처리
-├── order-service/        # 주문 생성, 멱등성, Outbox 기록
-├── payment-service/      # 결제 이벤트 처리
-├── product-service/      # 상품 API, 재고 이벤트 수신, Redis 캐시
-├── portfolio/            # README용 스크린샷 및 아키텍처 이미지
-└── docker-compose.yml
+발행 대기 이벤트 조회
+-> leaseOwner, leaseUntil 갱신
+-> lease를 잡은 publisher만 Kafka 발행
+-> 성공 시 published 처리
 ```
+
+이 구조는 완벽히 중복을 없애기보다, 중복 가능성을 줄이고 consumer가 멱등하게 처리할 수 있는 기반을 만듭니다.
+
+## Idempotency
+
+주문 생성 API에는 `Idempotency-Key`를 사용했습니다. 클라이언트가 네트워크 문제로 같은 요청을 다시 보내더라도 중복 주문이 생기지 않도록 하기 위한 장치입니다.
+
+이벤트 소비 측면에서는 eventId를 기준으로 이미 처리한 이벤트인지 확인하는 방식으로 중복 처리를 방어합니다. 분산 시스템에서는 "한 번만 전달"을 기대하기보다, "두 번 와도 결과가 망가지지 않게" 만드는 것이 더 현실적이라고 봤습니다.
+
+## Product 캐시와 재고 이벤트
+
+`product-service`는 상품 조회 성능을 위해 Redis 캐시를 사용할 수 있도록 구성했습니다. 재고 변경 이벤트가 발생하면 상품 조회 캐시를 갱신하거나 무효화할 수 있습니다.
+
+커머스 서비스에서 상품 조회는 읽기 트래픽이 많고, 주문과 재고 변경은 쓰기 이벤트가 중요합니다. 이 둘을 분리해 상품 조회 성능과 재고 정합성 사이의 균형을 설명할 수 있게 했습니다.
+
+## 주문 확인 화면
+
+![Checkout UI](./images/05-ui-checkout.png)
+
+웹 클라이언트는 서비스가 여러 개로 나뉘어 있어도 사용자가 보는 흐름은 하나의 주문 경험으로 이어진다는 점을 보여줍니다. 상품 선택, 주문 생성, 최근 주문 확인을 같은 화면에서 확인할 수 있어 이벤트 기반 흐름을 설명할 때 보조 자료로 쓰기 좋습니다.
+
+## 로컬 재현 환경
+
+이 프로젝트는 Docker Compose로 Kafka, Redis, PostgreSQL, 각 서비스를 함께 띄울 수 있게 구성했습니다.
+
+```text
+Kafka / Zookeeper
+Redis
+order-postgres
+inventory-postgres
+payment-postgres
+product-postgres
+order-service
+inventory-service
+payment-service
+product-service
+```
+
+서비스가 많아지면 실행 난이도가 올라가기 때문에, 포트폴리오에서는 로컬 재현 가능성이 중요하다고 봤습니다.
+
+## 블로그 포스팅 패키지
+
+Kotlin Commerce Core도 Portfolio Hub에 게시할 수 있도록 블로그 패키지 구조를 추가했습니다.
+
+```text
+blog/article.md
+blog/images/*
+.portfolio/manifest.json
+-> dist/portfolio-package/
+-> S3 portfolio-feed/kotlin-commerce-core/
+```
+
+포스팅 업로드는 수동 GitHub Actions 워크플로우로만 실행합니다. 아키텍처 글은 코드가 바뀔 때마다 자동 게시되는 것보다, 글과 이미지가 정리된 시점에 명시적으로 게시하는 편이 더 안전하다고 봤습니다.
+
+## 회고
+
+이 프로젝트는 "서비스를 여러 개로 나눴다"보다 "나눈 뒤 생기는 문제를 어떻게 다뤘다"에 초점을 둔 포트폴리오입니다.
+
+MSA는 구조 자체가 목적이 되기 쉽습니다. 하지만 실제로 중요한 것은 메시지 발행 실패, 중복 이벤트, 재시도, 멱등성, 캐시 무효화처럼 운영 중에 터지는 문제입니다. Kotlin Commerce Core는 그런 문제들을 커머스 주문 흐름 안에 넣어 설명하기 위해 만든 프로젝트입니다.
+
+나중에 더 확장한다면 Saga 보상 트랜잭션, DLQ, OpenTelemetry trace, consumer lag 모니터링, 재처리 운영 화면까지 붙여볼 수 있습니다.

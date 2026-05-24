@@ -466,9 +466,9 @@ a {
   display: block;
   width: 100%;
   height: 176px;
-  object-fit: cover;
+  object-fit: contain;
   border-right: 1px solid #d6dbe0;
-  background: #e1e5e9;
+  background: #eef1f3;
 }
 
 .project-cover-empty {
@@ -919,6 +919,42 @@ a {
   margin: 18px 0;
   border: 1px solid #d2d7dc;
   border-radius: 8px;
+}
+
+.mermaid-diagram {
+  overflow-x: auto;
+  border: 1px solid #d2d7dc;
+  border-radius: 8px;
+  background: #f8f9fa;
+  margin: 20px 0;
+  padding: 16px;
+}
+
+.mermaid-diagram svg {
+  display: block;
+  min-width: 100%;
+}
+
+.mermaid-diagram line {
+  stroke: #8a959f;
+  stroke-width: 2;
+}
+
+.mermaid-diagram marker path {
+  fill: #8a959f;
+}
+
+.mermaid-diagram rect {
+  fill: #ffffff;
+  stroke: #c8d0d7;
+  stroke-width: 1.5;
+}
+
+.mermaid-diagram text {
+  fill: #273039;
+  font-size: 13px;
+  font-weight: 900;
+  text-anchor: middle;
 }
 
 .markdown-card pre {

@@ -1,215 +1,123 @@
-# Maternity Care Commerce Portfolio
+# Care Commerce Platform
 
-## 프로젝트 한 줄 소개
+임신, 출산, 육아처럼 민감하고 개인적인 생애 이벤트를 다루는 서비스는 단순히 상품을 보여주고 주문을 받는 커머스와 다르게 설계되어야 합니다. 사용자는 자신의 상태를 기록하고 상담을 남기며, 운영자는 그 정보를 바탕으로 CS, 상품 운영, 마케팅 동의 고객 관리, 감사 로그를 함께 다뤄야 합니다.
 
-임산부/산모 사용자 서비스, 산모 전용 커머스, CS·운영·마케팅 관리자 백오피스를 하나의 백엔드 중심 시스템으로 설계한 포트폴리오입니다.
+Care Commerce Platform은 이런 케어 커머스 운영 흐름을 포트폴리오용으로 재구성한 프로젝트입니다. 특정 회사 코드나 실제 데이터를 사용하지 않고, 고객 데스크톱 웹, iOS 앱, 관리자 백오피스, Spring Boot API 서버를 분리해 하나의 운영 시스템처럼 동작하도록 만들었습니다.
 
-## 지원 포지션과의 연결
+## 왜 이 프로젝트를 만들었나
 
-이 프로젝트는 백엔드 개발자 포지션을 기준으로 만들었습니다. 단순 API 구현보다 실제 회사 내부에서 백엔드가 담당하는 운영 흐름을 보여주는 데 집중했습니다.
+이 프로젝트의 목표는 "상품 CRUD를 구현했다"가 아닙니다. 고객이 상품을 탐색하고 장바구니에 담고 주문을 만들며 상담을 남기는 흐름이, 운영자 화면의 회원 관리, 상품 관리, CS 처리, 마케팅 대상 조회, 감사 로그로 어떻게 이어지는지를 보여주는 것이 핵심입니다.
 
-- 사용자 서비스: 산모 프로필, 상품 조회, 장바구니, 주문, 상담 신청
-- 관리자 서비스: 회원 조회, 산모 프로필 확인, 상품 관리, CS 처리, 마케팅 동의 고객 필터링
-- 백엔드 핵심: 인증/권한, DB 설계, 동의 이력, 감사 로그, 통계 API, 운영 데이터 처리
+특히 모성 케어 도메인은 개인정보와 민감정보를 다룰 가능성이 높습니다. 그래서 고객 화면과 관리자 화면을 단순히 같은 API에 붙이지 않고, 접근 경계와 감사 가능한 운영 흐름을 분리하는 데 집중했습니다.
 
-## 전체 구조
-
-```txt
-client-web  -> 사용자용 모바일 웹/PWA
-admin-web   -> 관리자 백오피스 웹
-backend     -> Spring Boot API server
+```text
+고객 데스크톱 웹 -> client-api -> 주문, 상담, 프로필
+iOS 앱          -> client-api -> 모바일 고객 경험
+관리자 웹       -> admin-api  -> 회원, 상품, CS, 마케팅, 감사 로그
 ```
 
-```txt
-/client-api/v1/**   사용자 서비스 API
-/admin-api/v1/**    관리자 운영 API
+## 실행 단위를 나눈 이유
+
+프로젝트는 하나의 레포 안에 있지만 실행 단위는 네 개로 나눴습니다.
+
+| 실행 단위 | 역할 |
+| --- | --- |
+| `desktop-web` | PC 고객용 상품 탐색, 장바구니, 주문 현황, 상담 상태 |
+| `ios-app` | SwiftUI 기반 네이티브 iOS 고객 앱 |
+| `admin-web` | 운영자용 대시보드, 회원, 상품, CS, 마케팅 관리 |
+| `backend` | 사용자 API와 관리자 API를 제공하는 Spring Boot 서버 |
+
+실제 운영 환경이라면 고객용 웹, 모바일 앱, 관리자 백오피스, API 서버는 배포 방식과 장애 영향 범위가 다릅니다. 그래서 포트폴리오에서도 처음부터 실행 단위를 분리해 설계했습니다.
+
+## 고객 데스크톱 웹
+
+데스크톱 고객 웹은 넓은 화면에서 상품, 장바구니, 주문, 상담 상태를 한 번에 볼 수 있도록 구성했습니다.
+
+![고객 데스크톱 웹](./images/01-desktop-web.png)
+
+첫 화면을 마케팅 랜딩 페이지처럼 만들지 않았습니다. 포트폴리오에서 보여주고 싶었던 것은 "서비스를 소개하는 화면"이 아니라 "실제 사용자가 반복적으로 쓰는 화면"이었기 때문입니다.
+
+고객은 상품을 확인하고 장바구니에 담은 뒤 주문으로 넘어갑니다. 주문 이후에는 상담 요청이나 케어 프로필 수정처럼 고객 상태와 연결된 기능으로 이어집니다.
+
+설계하면서 중요하게 본 점은 다음과 같습니다.
+
+- 상품 목록과 장바구니 합계를 같은 흐름 안에서 확인할 수 있게 구성
+- iOS 앱과 같은 고객 API를 사용하되 데스크톱에 맞는 화면 밀도 적용
+- 주문, 상담, 프로필이 서로 끊어지지 않고 하나의 고객 여정처럼 보이도록 구성
+
+## iOS 고객 앱
+
+iOS 앱은 같은 고객 API를 사용할 수 있는 SwiftUI 기반 네이티브 앱입니다.
+
+![iOS 고객 앱](./images/02-ios-app.png)
+
+모바일에서는 한 화면에 많은 정보를 넣는 것보다 반복 사용 흐름을 빠르게 오가는 것이 더 중요하다고 봤습니다. 그래서 홈, 상품, 장바구니, 프로필, 상담을 하단 탭으로 나누고, 각 탭은 하나의 목적에 집중하도록 구성했습니다.
+
+주요 흐름은 다음과 같습니다.
+
+| 화면 | 사용 목적 |
+| --- | --- |
+| 홈 | 케어 상태와 최근 활동 요약 |
+| 상품 | 카테고리별 상품 탐색 |
+| 장바구니 | 주문 전 상품 수량과 합계 확인 |
+| 프로필 | 임신/출산 관련 케어 정보 저장 |
+| 상담 | 상담 신청과 처리 상태 확인 |
+
+Xcode가 없어도 화면 흐름을 확인할 수 있도록 브라우저 기반 preview도 함께 두었습니다. 포트폴리오를 보는 사람이 iOS 앱을 직접 빌드하지 않아도 화면 설계를 이해할 수 있게 하기 위한 장치입니다.
+
+## 관리자 백오피스
+
+관리자 웹은 CS, 운영, 마케팅 담당자가 쓰는 백오피스를 기준으로 만들었습니다.
+
+![관리자 백오피스](./images/03-admin-web.png)
+
+관리자는 대시보드에서 운영 지표를 확인하고, 회원 상세와 케어 프로필, 상품, 주문, 상담, 마케팅 동의 고객을 관리합니다. 고객 화면에서 발생한 주문과 상담 데이터가 운영 화면으로 이어지는 것을 보여주는 것이 목적입니다.
+
+관리자 화면에서 특히 중요하게 본 부분은 "운영자가 왜 이 정보를 보는가"입니다. 단순히 테이블을 많이 보여주는 것보다, 개인정보 접근이나 상담 상태 변경처럼 나중에 추적해야 할 가능성이 있는 행동을 감사 로그로 남기는 구조를 넣었습니다.
+
+## API 경계와 권한 분리
+
+사용자 화면과 관리자 화면은 같은 도메인 데이터를 다루지만 목적이 다릅니다. 고객은 자신의 주문과 프로필을 다루고, 관리자는 운영 목적에 따라 여러 회원과 상담 정보를 조회합니다.
+
+그래서 API prefix를 분리했습니다.
+
+```text
+/client-api/v1/**
+/admin-api/v1/**
 ```
 
-사용자와 관리자는 같은 회원·상품·주문 데이터를 사용하지만, 목적과 권한이 다르기 때문에 API 계층을 분리했습니다. 공통 도메인 로직은 `domain` 패키지에 두고, 사용자/관리자 진입점만 `client`, `admin` 패키지로 나누었습니다.
+이 분리는 포트폴리오에서 가장 중요한 설계 포인트 중 하나입니다. 같은 `Member`, `Order`, `Consultation` 데이터를 다루더라도 사용자 API와 관리자 API의 응답 모델, 권한, 감사 기준은 달라야 합니다.
 
-## 사용자 화면
+## 도메인 모델링
 
-### 1. 사용자 홈
+도메인 모델은 케어 프로필, 커머스, CS, 운영 감사를 중심으로 잡았습니다.
 
-![사용자 홈](https://raw.githubusercontent.com/MIMminE/maternity-care-commerce/main/docs/assets/portfolio/client-home.png)
+| 영역 | 주요 모델 |
+| --- | --- |
+| 인증/동의 | Member, ConsentHistory |
+| 케어 프로필 | PregnancyProfile |
+| 커머스 | Product, Cart, Order, OrderItem |
+| CS | Consultation, ProductInquiry |
+| 운영 감사 | AuditLog |
 
-사용자 홈은 산모가 자신의 상태를 빠르게 확인하는 화면입니다. 임신 주차, 최근 주문 상태처럼 사용자가 반복적으로 확인할 정보를 우선 배치했습니다.
+### 동의 이력은 덮어쓰지 않는다
 
-백엔드 연결 포인트:
+동의 정보는 단순 boolean 컬럼으로만 두지 않았습니다. 약관, 개인정보, 민감정보, 마케팅 동의는 언제 어떤 항목에 동의했는지 추적할 수 있어야 한다고 봤습니다.
 
-- `GET /client-api/v1/me`
-- `GET /client-api/v1/pregnancy-profile/me`
-- `GET /client-api/v1/orders`
-
-설계 의도:
-
-- 산모 프로필을 일반 회원 정보와 분리했습니다.
-- 임신 주차, 출산 예정일, 출산 여부 같은 도메인 데이터가 콘텐츠/상품 추천으로 확장될 수 있게 설계했습니다.
-
-### 2. 상품 조회
-
-![사용자 상품 조회](https://raw.githubusercontent.com/MIMminE/maternity-care-commerce/main/docs/assets/portfolio/client-products.png)
-
-사용자는 판매 중인 상품만 조회할 수 있습니다. 관리자에서 상품 상태를 `ON_SALE`, `DRAFT`, `SOLD_OUT`, `HIDDEN`으로 관리하고, 사용자 API는 `ON_SALE` 상품만 노출합니다.
-
-백엔드 연결 포인트:
-
-- `GET /client-api/v1/products`
-- `GET /client-api/v1/products/{productId}`
-- `POST /client-api/v1/cart`
-
-설계 의도:
-
-- 일반 커머스의 상품 조회/장바구니 흐름을 구현했습니다.
-- 주문 생성 시 상품 가격을 `OrderItem.unitPrice`에 저장해, 이후 상품 가격이 바뀌어도 주문 내역의 금액이 변하지 않게 했습니다.
-
-### 3. 상담 신청
-
-![사용자 상담 신청](https://raw.githubusercontent.com/MIMminE/maternity-care-commerce/main/docs/assets/portfolio/client-consultation.png)
-
-상담 신청은 단순 게시판이 아니라 CS/운영팀이 처리할 업무 티켓으로 이어집니다. 사용자는 상담을 등록하고, 관리자는 상태와 내부 메모를 관리합니다.
-
-백엔드 연결 포인트:
-
-- `POST /client-api/v1/consultations`
-- `GET /client-api/v1/consultations`
-- `PATCH /admin-api/v1/consultations/{consultationId}/status`
-
-설계 의도:
-
-- 고객 접점 업무를 운영 데이터로 관리할 수 있게 했습니다.
-- 관리자 상태 변경 시 `AuditLog`를 남겨 누가 어떤 사유로 처리했는지 추적할 수 있습니다.
-
-## 관리자 화면
-
-### 1. 운영 대시보드
-
-![관리자 대시보드](https://raw.githubusercontent.com/MIMminE/maternity-care-commerce/main/docs/assets/portfolio/admin-dashboard.png)
-
-관리자 대시보드는 운영팀이 매일 확인해야 하는 지표를 모아 보여줍니다.
-
-표시 지표:
-
-- 총 회원 수
-- 마케팅 동의 회원 수
-- 총 주문 수
-- 누적 주문금액
-- 대기 상담 수
-- 대기 상품 문의 수
-
-백엔드 연결 포인트:
-
-- `GET /admin-api/v1/statistics/dashboard`
-
-설계 의도:
-
-- SQL/JPA 집계 쿼리를 활용해 운영 지표를 제공합니다.
-- 운영팀, CS팀, 마케팅팀이 같은 백엔드를 통해 각자 필요한 데이터를 확인하는 구조를 만들었습니다.
-
-### 2. 회원 상세와 산모 프로필
-
-![관리자 회원 상세](https://raw.githubusercontent.com/MIMminE/maternity-care-commerce/main/docs/assets/portfolio/admin-members.png)
-
-회원 상세 화면은 CS/운영 담당자가 고객 응대 시 확인하는 화면입니다. 회원 정보와 산모 프로필을 함께 보여주지만, 이 정보는 민감할 수 있으므로 조회 시 감사 로그를 저장합니다.
-
-백엔드 연결 포인트:
-
-- `GET /admin-api/v1/members`
-- `GET /admin-api/v1/members/{memberId}`
-
-감사 로그:
-
-- `VIEW_MEMBER`
-- `VIEW_PREGNANCY_PROFILE`
-
-설계 의도:
-
-- 산모 프로필은 임신/출산 관련 데이터이므로 관리자 조회를 추적 가능하게 만들었습니다.
-- `X-Audit-Reason` 헤더로 조회 사유를 받아 감사 로그에 남깁니다.
-
-### 3. 상품 관리
-
-![관리자 상품 관리](https://raw.githubusercontent.com/MIMminE/maternity-care-commerce/main/docs/assets/portfolio/admin-products.png)
-
-관리자는 상품을 등록하고 판매 상태를 관리할 수 있습니다. 사용자 화면에는 판매 중인 상품만 노출됩니다.
-
-백엔드 연결 포인트:
-
-- `GET /admin-api/v1/products`
-- `POST /admin-api/v1/products`
-- `PATCH /admin-api/v1/products/{productId}`
-
-설계 의도:
-
-- 관리자 상품 상태와 사용자 노출 정책을 분리했습니다.
-- 재고 수량은 주문 생성 시 차감되며, 재고가 0이 되면 `SOLD_OUT`으로 전환됩니다.
-
-### 4. 마케팅 동의 고객 필터
-
-![마케팅 동의 고객](https://raw.githubusercontent.com/MIMminE/maternity-care-commerce/main/docs/assets/portfolio/admin-marketing.png)
-
-마케팅팀은 마케팅 수신 동의 고객만 조회할 수 있습니다. 이 조회는 개인정보 활용 가능성이 있는 업무이므로 감사 로그를 남깁니다.
-
-백엔드 연결 포인트:
-
-- `GET /admin-api/v1/marketing/members`
-
-감사 로그:
-
-- `EXPORT_MARKETING_TARGETS`
-
-설계 의도:
-
-- 마케팅 동의는 회원 테이블의 단일 컬럼이 아니라 `ConsentHistory`로 이력 관리합니다.
-- 단순 고객 목록 조회가 아니라 “목적 있는 개인정보 활용”으로 보고 감사 로그를 저장합니다.
-
-## 백엔드 패키지 구조
-
-```txt
-com.portfolio.maternity
-├── client       # 사용자 API
-├── admin        # 관리자 API
-├── domain       # 핵심 도메인 모델
-├── global       # 보안, 예외, 공통 설정
-└── infra        # 외부 연동 확장 영역
-```
-
-주요 도메인:
-
-```txt
-member
-pregnancy
-consent
-product
-cart
-order
-consultation
-inquiry
-audit
-adminuser
-statistics
-```
-
-## 데이터 설계 포인트
-
-### 동의 이력
-
-`ConsentHistory`는 약관, 개인정보, 민감정보, 마케팅 동의를 이력으로 저장합니다.
-
-```txt
+```text
 TERMS
 PRIVACY
 SENSITIVE_INFORMATION
 MARKETING
 ```
 
-최신 상태만 덮어쓰는 방식이 아니라, 사용자가 언제 어떤 항목에 동의했는지 추적할 수 있게 했습니다.
+그래서 `ConsentHistory`를 별도 모델로 두고, 동의 이벤트를 이력으로 저장하는 방향을 선택했습니다.
 
-### 감사 로그
+### 관리자 조회는 감사 가능한 이벤트다
 
-관리자 업무 중 개인정보 접근 또는 운영 상태 변경이 발생하는 경우 `AuditLog`를 저장합니다.
+관리자 업무 중 회원 상세나 케어 프로필을 조회하는 행위는 단순 조회처럼 보이지만 운영 리스크가 있습니다. 그래서 다음 액션은 `AuditLog`로 남기도록 설계했습니다.
 
-```txt
+```text
 VIEW_MEMBER
 VIEW_PREGNANCY_PROFILE
 UPDATE_CONSULTATION
@@ -217,27 +125,30 @@ UPDATE_INQUIRY
 EXPORT_MARKETING_TARGETS
 ```
 
-이 설계는 CS, 운영, 마케팅, 법무 부서가 같은 시스템을 사용한다는 전제를 반영합니다.
+이렇게 하면 기능 구현뿐 아니라 개인정보 접근 통제와 운영 추적성까지 함께 설명할 수 있습니다.
 
-### 주문 가격 스냅샷
+### 주문 가격은 스냅샷으로 저장한다
 
-상품 가격은 변경될 수 있으므로 주문 시점의 가격을 `OrderItem.unitPrice`에 저장합니다.
+상품 가격은 언제든 변경될 수 있습니다. 따라서 주문 상세에서는 현재 상품 가격이 아니라 주문 당시 상품명과 단가를 저장해야 합니다.
 
-```txt
-Product.price      현재 상품 가격
+```text
+Product.price       현재 상품 가격
 OrderItem.unitPrice 주문 당시 상품 가격
 ```
 
-이를 통해 상품 가격 변경 후에도 과거 주문 금액이 변하지 않습니다.
+이 구조를 통해 상품 가격이 변경되어도 과거 주문 금액이 흔들리지 않습니다.
 
-## 기술 스택
+## 기술 스택과 검증
 
-```txt
+```text
 Backend
 Java 17, Spring Boot 3, Spring Security, JPA, Flyway, PostgreSQL, H2
 
 Frontend
 React, TypeScript, Vite
+
+iOS
+Swift, SwiftUI, Xcode project
 
 Infra
 Docker, Docker Compose, Nginx, AWS EC2/RDS/S3/CloudFront, GitHub Actions
@@ -246,61 +157,35 @@ Test
 JUnit 5, Spring Boot Test, MockMvc
 ```
 
-## 테스트와 CI
+대표 검증 명령은 다음과 같습니다.
 
-백엔드 통합 테스트:
-
-- 사용자 회원가입/로그인
-- 산모 프로필 등록/조회
-- 동의 이력 조회
-- 상품 조회
-- 장바구니 담기
-- 주문 생성
-- 상담/상품 문의 생성
-- 관리자 통계 조회
-- 마케팅 동의 고객 조회
-
-GitHub Actions:
-
-```txt
-backend-ci
-client-web-ci
-admin-web-ci
+```bash
+cd desktop-web && npm run build
+cd admin-web && npm run build
+find ios-app/CareCommerceiOS -name "*.swift" -print | sort | xargs swiftc -typecheck -parse-as-library
+cd backend && ./gradlew test
+node scripts/build-portfolio-package.mjs
 ```
 
-최신 CI는 모두 성공 상태입니다.
+## 블로그 포스팅 패키지
 
-## 배포 설계
+이 프로젝트는 포트폴리오 허브에 게시하기 위해 `blog/` 패키지를 별도로 둡니다.
 
-```txt
-client-web  -> S3 + CloudFront
-admin-web   -> S3 + CloudFront
-backend     -> EC2 + Docker + Nginx
-database    -> RDS PostgreSQL
-domain/ssl  -> Route53 + ACM
+```text
+blog/article.md
+blog/images/*
+.portfolio/manifest.json
+-> dist/portfolio-package/
+-> S3 portfolio-feed
+-> Portfolio Hub
 ```
 
-1차 포트폴리오에서는 AWS 인프라를 수동 구성하고, GitHub Actions로 배포를 자동화하는 전략을 문서화했습니다. Terraform은 후속 개선 과제로 분리했습니다.
+프로젝트 레포에서는 글과 이미지를 약속된 구조로 관리하고, 수동 GitHub Actions 워크플로우를 실행하면 S3에 게시물 패키지를 올릴 수 있습니다. 허브는 S3의 `portfolio-feed/index.json`과 각 프로젝트의 `manifest.json`을 읽어 블로그 게시물처럼 렌더링합니다.
 
-## 시연 계정
+## 회고
 
-로컬 프로필에서는 데모 데이터가 자동 적재됩니다.
+이 프로젝트를 만들면서 가장 신경 쓴 부분은 "백엔드 포트폴리오인데 왜 화면이 필요한가"였습니다. 백엔드는 API만으로도 설명할 수 있지만, 운영 시스템에서는 화면이 있어야 요구사항의 맥락이 보입니다.
 
-```txt
-관리자
-admin@example.com / password123!
+고객이 남긴 프로필과 상담이 관리자 화면에서 어떻게 처리되는지, 관리자가 어떤 데이터를 볼 때 감사 로그가 남아야 하는지, 상품 가격 변경이 과거 주문에 영향을 주지 않도록 어떻게 스냅샷을 남기는지 같은 문제는 화면과 도메인 모델을 함께 보여줄 때 더 잘 전달됩니다.
 
-사용자
-mother@example.com / password123!
-```
-
-## 구현을 통해 보여주고 싶은 역량
-
-- 도메인을 이해하고 DB 모델로 정리하는 능력
-- 사용자 API와 관리자 API를 분리하는 설계 감각
-- 현업 부서의 요구사항을 백엔드 기능으로 바꾸는 능력
-- 개인정보/민감정보 접근에 대한 감사 로그 설계
-- 커머스 주문/재고/가격 스냅샷 처리
-- 테스트와 CI를 포함한 실무형 개발 흐름
-- 화면을 통해 API가 실제 서비스 흐름에서 어떻게 쓰이는지 검증하는 태도
-
+그래서 Care Commerce Platform은 "프론트를 붙인 백엔드 프로젝트"가 아니라, 고객 경험과 운영 경험을 기준으로 백엔드 경계를 설계한 포트폴리오로 정리했습니다.
