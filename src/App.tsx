@@ -182,8 +182,10 @@ function DeveloperProfileSummary() {
 function ProjectArticle({ project, status }: { project: Project; status?: GeneratedProjectStatus }) {
   const updatedAt = status?.pushedAt ?? project.syncedFromManifestAt;
   const manifestReleaseLink = project.links.find((link) => link.type === "release");
-  const releaseUrl = status?.latestReleaseUrl ?? manifestReleaseLink?.url;
+  const githubReleaseUrl = status?.latestReleaseUrl;
+  const s3ReleaseUrl = status?.latestS3ReleaseAssetUrl ?? manifestReleaseLink?.url;
   const releaseLabel = status?.latestReleaseName ?? status?.latestReleaseTag ?? manifestReleaseLink?.label;
+  const releaseAssetName = status?.latestReleaseAssetName;
   const articleMarkdown = useMemo(
     () => removeDuplicateTitleHeading(project.entryDocumentMarkdown, project.title),
     [project.entryDocumentMarkdown, project.title]
@@ -306,13 +308,23 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
                 </div>
               </div>
             </section>
-            {releaseUrl ? (
+            {s3ReleaseUrl || githubReleaseUrl ? (
               <section className="article-sidebar-card release-card" aria-label="Project release download">
                 <h2>릴리즈</h2>
                 <p>{releaseLabel ?? "Latest Release"}</p>
-                <a href={releaseUrl} target="_blank" rel="noreferrer">
-                  릴리즈 다운로드
-                </a>
+                {releaseAssetName ? <span>{releaseAssetName}</span> : null}
+                <div className="release-actions">
+                  {s3ReleaseUrl ? (
+                    <a download href={s3ReleaseUrl}>
+                      S3 파일 다운로드
+                    </a>
+                  ) : null}
+                  {githubReleaseUrl ? (
+                    <a className="release-secondary-link" href={githubReleaseUrl} target="_blank" rel="noreferrer">
+                      GitHub 릴리즈
+                    </a>
+                  ) : null}
+                </div>
               </section>
             ) : null}
             {tocHeadings.length > 0 ? (

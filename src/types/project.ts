@@ -76,6 +76,9 @@ export interface GeneratedProjectStatus {
   latestReleaseTag: string | null;
   latestReleaseUrl: string | null;
   latestReleaseName: string | null;
+  latestReleaseAssetName: string | null;
+  latestReleaseAssetUrl: string | null;
+  latestS3ReleaseAssetUrl: string | null;
   openIssues: number;
   stars: number;
   forks: number;

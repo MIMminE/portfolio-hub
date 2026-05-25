@@ -33,11 +33,18 @@ interface GitHubReleaseResponse {
   tag_name: string;
   html_url: string;
   name: string | null;
+  assets: GitHubReleaseAssetResponse[];
+}
+
+interface GitHubReleaseAssetResponse {
+  name: string;
+  browser_download_url: string;
 }
 
 const outputPath = resolve("src/data/generated-status.json");
 const configPath = resolve("config/portfolio-feed-projects.json");
 const token = process.env.GITHUB_TOKEN;
+const s3ReleaseBaseUrl = normalizeBaseUrl(process.env.PORTFOLIO_RELEASE_BASE_URL);
 const config = JSON.parse(await readFile(configPath, "utf8")) as KnownProjectsConfig;
 const projects = config.projects
   .filter((project): project is KnownProject & { repo: string } => Boolean(project.repo));
@@ -77,6 +84,7 @@ async function syncProject(project: (typeof projects)[number]): Promise<Generate
     }
 
     const latestCommit = commits[0];
+    const releaseAsset = selectPrimaryReleaseAsset(latestRelease);
 
     return {
       id: project.id,
@@ -91,6 +99,9 @@ async function syncProject(project: (typeof projects)[number]): Promise<Generate
       latestReleaseTag: latestRelease?.tag_name ?? null,
       latestReleaseUrl: latestRelease?.html_url ?? null,
       latestReleaseName: latestRelease?.name ?? null,
+      latestReleaseAssetName: releaseAsset?.name ?? null,
+      latestReleaseAssetUrl: releaseAsset?.browser_download_url ?? null,
+      latestS3ReleaseAssetUrl: buildS3ReleaseAssetUrl(project.id, latestRelease?.tag_name, releaseAsset?.name),
       openIssues: repo.open_issues_count,
       stars: repo.stargazers_count,
       forks: repo.forks_count,
@@ -110,6 +121,9 @@ async function syncProject(project: (typeof projects)[number]): Promise<Generate
       latestReleaseTag: null,
       latestReleaseUrl: null,
       latestReleaseName: null,
+      latestReleaseAssetName: null,
+      latestReleaseAssetUrl: null,
+      latestS3ReleaseAssetUrl: null,
       openIssues: 0,
       stars: 0,
       forks: 0,
@@ -131,4 +145,32 @@ const errorCount = statuses.length - okCount;
 console.log(`Synced ${okCount}/${statuses.length} projects`);
 if (errorCount > 0) {
   console.log(`Failed ${errorCount} projects. Check generated-status.json for details.`);
+}
+
+function selectPrimaryReleaseAsset(release: GitHubReleaseResponse | null) {
+  if (!release?.assets?.length) {
+    return null;
+  }
+
+  return (
+    release.assets.find((asset) => !asset.name.includes("portfolio-package")) ??
+    release.assets[0] ??
+    null
+  );
+}
+
+function buildS3ReleaseAssetUrl(projectId: string, tagName: string | undefined, assetName: string | undefined) {
+  if (!s3ReleaseBaseUrl || !tagName || !assetName) {
+    return null;
+  }
+
+  return `${s3ReleaseBaseUrl}${encodeURIComponent(projectId)}/${encodeURIComponent(tagName)}/${encodeURIComponent(assetName)}`;
+}
+
+function normalizeBaseUrl(value: string | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  return value.endsWith("/") ? value : `${value}/`;
 }

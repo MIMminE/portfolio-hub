@@ -865,6 +865,22 @@ a {
   line-height: 1.5;
 }
 
+.release-card span {
+  display: block;
+  margin-top: 4px;
+  color: #6b747e;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.release-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
 .release-card a {
   display: flex;
   min-height: 34px;
@@ -872,7 +888,6 @@ a {
   justify-content: center;
   border-radius: 6px;
   background: #252b31;
-  margin-top: 10px;
   color: #ffffff;
   font-size: 13px;
   font-weight: 900;
@@ -881,6 +896,16 @@ a {
 
 .release-card a:hover {
   background: #3a424a;
+}
+
+.release-card .release-secondary-link {
+  border: 1px solid #c9d0d6;
+  background: #ffffff;
+  color: #2d343b;
+}
+
+.release-card .release-secondary-link:hover {
+  background: #edf1f4;
 }
 
 .toc-sidebar-card {

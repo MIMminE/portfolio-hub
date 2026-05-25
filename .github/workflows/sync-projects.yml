@@ -34,6 +34,7 @@ jobs:
         run: pnpm sync:all
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PORTFOLIO_RELEASE_BASE_URL: ${{ secrets.PORTFOLIO_RELEASE_BASE_URL }}
 
       - name: Commit generated status
         uses: stefanzweifel/git-auto-commit-action@v5
