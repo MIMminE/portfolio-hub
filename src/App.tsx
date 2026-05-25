@@ -3,22 +3,19 @@ import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import generatedStatuses from "./data/generated-status.json";
-import generatedProjects from "./data/generated-projects.json";
-import { projects } from "./data/projects";
 import { loadPortfolioFeed } from "./data/loadPortfolioFeed";
 import { ProjectCard } from "./components/ProjectCard";
 import type { GeneratedProjectStatus, Project } from "./types/project";
 
 const statuses = generatedStatuses as GeneratedProjectStatus[];
-const syncedProjects = generatedProjects as Project[];
 
 const hiddenProjectIds = new Set(["settlement-admin-api", "order-service-iac-cicd"]);
 const featuredProjectOrder = [
-  "maternity-care-commerce",
+  "devpilot",
   "warehouse-ops-suite",
+  "maternity-care-commerce",
   "stock-lock-benchmark",
-  "kotlin-commerce-core",
-  "devpilot"
+  "kotlin-commerce-core"
 ];
 
 const projectOrderById = new Map(featuredProjectOrder.map((id, index) => [id, index]));
@@ -32,9 +29,15 @@ const curateProjects = (projectList: Project[]) => (
     ))
 );
 
-const fallbackProjects = curateProjects(syncedProjects.length > 0 ? syncedProjects : projects);
-
 const markdownComponents: Components = {
+  img({ alt, src }) {
+    return (
+      <figure className="markdown-figure">
+        <img src={src ?? ""} alt={alt ?? ""} />
+        {alt ? <figcaption>{alt}</figcaption> : null}
+      </figure>
+    );
+  },
   pre({ children }) {
     const child = isValidElement<{ className?: string; children?: unknown }>(children) ? children : null;
     const className = child?.props.className ?? "";
@@ -48,7 +51,8 @@ const markdownComponents: Components = {
 };
 
 export function App() {
-  const [displayProjects, setDisplayProjects] = useState<Project[]>(fallbackProjects);
+  const [displayProjects, setDisplayProjects] = useState<Project[]>([]);
+  const [isFeedLoading, setIsFeedLoading] = useState(true);
   const [feedError, setFeedError] = useState<string | null>(null);
   const statusByProject = new Map(statuses.map((status) => [status.id, status]));
   const selectedProjectId = new URLSearchParams(window.location.search).get("project");
@@ -67,6 +71,11 @@ export function App() {
       .catch((error) => {
         if (!ignore) {
           setFeedError(error instanceof Error ? error.message : "Portfolio feed load failed");
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsFeedLoading(false);
         }
       });
 
@@ -95,7 +104,7 @@ export function App() {
 
       <section id="projects" className="projects-section">
         {feedError ? (
-          <p className="feed-warning">포트폴리오 패키지를 불러오지 못해 빌드 시점 데이터를 표시합니다.</p>
+          <p className="feed-warning">S3 포트폴리오 피드를 불러오지 못했습니다.</p>
         ) : null}
 
         <section className="home-overview" aria-label="Portfolio hub overview">
@@ -143,6 +152,10 @@ export function App() {
             />
           ))}
         </div>
+        {isFeedLoading ? <p className="feed-warning">S3 포트폴리오 피드를 불러오는 중입니다.</p> : null}
+        {!isFeedLoading && !feedError && displayProjects.length === 0 ? (
+          <p className="feed-warning">표시할 S3 포트폴리오 패키지가 없습니다.</p>
+        ) : null}
       </section>
 
     </main>
@@ -266,6 +279,13 @@ function ProjectArticle({ project, status }: { project: Project; status?: Genera
               <dd>{project.entryDocumentPath}</dd>
             </div>
           </dl>
+          {project.coverImage ? (
+            <figure className="article-cover-hero">
+              <div className="article-cover-backdrop" style={{ backgroundImage: `url(${project.coverImage})` }} />
+              <img src={project.coverImage} alt={project.coverAlt ?? `${project.title} 대표 화면`} />
+              <figcaption>{project.coverAlt ?? `${project.title} 대표 화면`}</figcaption>
+            </figure>
+          ) : null}
         </header>
 
         <div className="article-content-layout">

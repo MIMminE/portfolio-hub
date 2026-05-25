@@ -25,9 +25,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
       }}
     >
       {project.coverImage ? (
-        <img className="project-cover" src={project.coverImage} alt={project.coverAlt ?? `${project.title} preview`} />
+        <figure className="project-cover-frame">
+          <div className="project-cover-backdrop" style={{ backgroundImage: `url(${project.coverImage})` }} />
+          <img className="project-cover" src={project.coverImage} alt={project.coverAlt ?? `${project.title} preview`} />
+        </figure>
       ) : (
-        <div className="project-cover project-cover-empty">{project.title}</div>
+        <div className="project-cover-frame project-cover-empty">{project.title}</div>
       )}
 
       <div className="project-body">

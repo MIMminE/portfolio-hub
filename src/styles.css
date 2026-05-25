@@ -429,15 +429,14 @@ a {
 
 .project-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
   margin-top: 22px;
   counter-reset: case-study;
 }
 
 .project-card {
   display: grid;
-  grid-template-columns: 168px minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid #d4d9de;
   border-radius: 8px;
@@ -462,18 +461,38 @@ a {
   outline-offset: 3px;
 }
 
+.project-cover-frame {
+  position: relative;
+  display: grid;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  overflow: hidden;
+  border-bottom: 1px solid #d6dbe0;
+  background: #e7ebee;
+  margin: 0;
+}
+
+.project-cover-backdrop {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  filter: blur(18px);
+  opacity: 0.24;
+  transform: scale(1.08);
+}
+
 .project-cover {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
-  height: 176px;
+  height: 100%;
   object-fit: contain;
-  border-right: 1px solid #d6dbe0;
-  background: #eef1f3;
+  padding: 10px;
 }
 
 .project-cover-empty {
-  display: grid;
-  place-items: center;
   color: #68737d;
   font-weight: 900;
 }
@@ -642,6 +661,54 @@ a {
   white-space: nowrap;
   font-size: 12px;
   font-weight: 900;
+}
+
+.article-cover-hero {
+  position: relative;
+  display: grid;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #d2d7dc;
+  border-radius: 8px;
+  background: #e8ecef;
+  box-shadow: 0 18px 42px rgba(31, 37, 43, 0.12);
+  margin: 26px 0 0;
+}
+
+.article-cover-backdrop {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  filter: blur(22px);
+  opacity: 0.22;
+  transform: scale(1.08);
+}
+
+.article-cover-hero img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 14px;
+}
+
+.article-cover-hero figcaption {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 2;
+  max-width: calc(100% - 28px);
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 999px;
+  background: rgba(249, 250, 251, 0.86);
+  color: #3f4952;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
 }
 
 .article-meta-group {
@@ -913,12 +980,24 @@ a {
   font-weight: 800;
 }
 
-.markdown-card img {
+.markdown-figure {
+  margin: 22px 0;
+}
+
+.markdown-figure img {
   display: block;
+  width: 100%;
   max-width: 100%;
-  margin: 18px 0;
   border: 1px solid #d2d7dc;
   border-radius: 8px;
+}
+
+.markdown-figure figcaption {
+  margin-top: 7px;
+  color: #66717b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.5;
 }
 
 .mermaid-diagram {
@@ -1049,11 +1128,8 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .project-cover {
-    height: 176px;
-    aspect-ratio: 16 / 8.5;
-    border-right: 0;
-    border-bottom: 1px solid #d6dbe0;
+  .project-cover-frame {
+    aspect-ratio: 16 / 10;
   }
 
   .case-study-summary div {

@@ -10,10 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "sync:github": "tsx scripts/sync-github-projects.ts",
-    "sync:manifests": "tsx scripts/sync-project-manifests.ts",
     "feed:index": "tsx scripts/build-portfolio-feed-index.ts",
-    "sync:packages": "tsx scripts/build-local-portfolio-feed.ts",
-    "sync:all": "pnpm sync:github && pnpm sync:manifests && pnpm sync:packages"
+    "sync:all": "pnpm sync:github"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",

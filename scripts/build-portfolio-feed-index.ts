@@ -10,6 +10,7 @@ interface KnownProjectsConfig {
 interface KnownProject {
   id: string;
   packagePath: string;
+  repo?: string;
 }
 
 const configPath = resolve("config/portfolio-feed-projects.json");

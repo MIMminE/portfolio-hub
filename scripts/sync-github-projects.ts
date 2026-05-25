@@ -1,7 +1,15 @@
-import { mkdir, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { projects } from "../src/data/projects";
 import type { GeneratedProjectStatus } from "../src/types/project";
+
+interface KnownProjectsConfig {
+  projects: KnownProject[];
+}
+
+interface KnownProject {
+  id: string;
+  repo?: string;
+}
 
 interface GitHubRepoResponse {
   html_url: string;
@@ -28,7 +36,11 @@ interface GitHubReleaseResponse {
 }
 
 const outputPath = resolve("src/data/generated-status.json");
+const configPath = resolve("config/portfolio-feed-projects.json");
 const token = process.env.GITHUB_TOKEN;
+const config = JSON.parse(await readFile(configPath, "utf8")) as KnownProjectsConfig;
+const projects = config.projects
+  .filter((project): project is KnownProject & { repo: string } => Boolean(project.repo));
 
 async function requestJson<T>(url: string): Promise<T> {
   const response = await fetch(url, {

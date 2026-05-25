@@ -2,24 +2,29 @@
   "version": "1.0",
   "projects": [
     {
-      "id": "maternity-care-commerce",
-      "packagePath": "maternity-care-commerce/manifest.json"
+      "id": "devpilot",
+      "packagePath": "devpilot/manifest.json",
+      "repo": "MIMminE/devpilot"
     },
     {
       "id": "warehouse-ops-suite",
-      "packagePath": "warehouse-ops-suite/manifest.json"
+      "packagePath": "warehouse-ops-suite/manifest.json",
+      "repo": "MIMminE/warehouse-ops-suite"
+    },
+    {
+      "id": "maternity-care-commerce",
+      "packagePath": "maternity-care-commerce/manifest.json",
+      "repo": "MIMminE/maternity-care-commerce"
     },
     {
       "id": "stock-lock-benchmark",
-      "packagePath": "stock-lock-benchmark/manifest.json"
+      "packagePath": "stock-lock-benchmark/manifest.json",
+      "repo": "MIMminE/stock-lock-benchmark"
     },
     {
       "id": "kotlin-commerce-core",
-      "packagePath": "kotlin-commerce-core/manifest.json"
-    },
-    {
-      "id": "devpilot",
-      "packagePath": "devpilot/manifest.json"
+      "packagePath": "kotlin-commerce-core/manifest.json",
+      "repo": "MIMminE/kotlin-commerce-core"
     }
   ]
 }

@@ -25,13 +25,13 @@
 
 - `warehouse-ops-suite`: 화면, 사용자 매뉴얼, 기능 명세, 실행 단위 설명이 가장 잘 연결되어 있다.
 - `maternity-care-commerce`: 사용자/관리자 화면과 도메인 요구사항 설명이 균형 있게 정리되어 있다.
-- `stock-lock-benchmark`: 실험 결과가 수치와 화면으로 같이 제시되어 면접 질문으로 이어지기 좋다.
+- `stock-lock-benchmark`: 실험 결과가 수치와 화면으로 같이 제시되어 설계 판단의 근거가 잘 보인다.
 
 ### 보강하면 좋은 지점
 
-- `kotlin-commerce-core`: README는 충분하지만 별도 사용자 매뉴얼보다는 아키텍처 설명 중심이다. 면접에서는 Outbox/Idempotency 흐름을 먼저 설명하는 편이 좋다.
+- `kotlin-commerce-core`: README는 충분하지만 별도 사용자 매뉴얼보다는 아키텍처 설명 중심이다. Outbox/Idempotency 흐름을 먼저 보여주는 편이 좋다.
 - `settlement-admin-api`: 정산 도메인 설명은 가능하지만 현재 허브에서는 완성도 높은 대표 프로젝트에 집중하기 위해 노출하지 않는다.
-- `order-service-iac-cicd`: IaC/CD 역량은 의미 있지만 현재 허브에서는 별도 카드로 노출하지 않고, 필요 시 면접 보조 소재로만 사용한다.
+- `order-service-iac-cicd`: IaC/CD 역량은 의미 있지만 현재 허브에서는 별도 카드로 노출하지 않고, 필요 시 보조 소재로만 사용한다.
 
 ## 시연 순서 추천
 
@@ -43,9 +43,8 @@
 ## 허브 운영 메모
 
 - 각 프로젝트의 최신 커밋/릴리즈 정보는 `pnpm sync:github`로 갱신한다.
-- 각 프로젝트의 공개 설명, 대표 이미지, 문서 링크는 해당 레포의 `.portfolio/project.json`에서 관리한다.
-- 상태와 manifest를 함께 갱신하려면 `pnpm sync:all`을 실행한다.
-- 프로젝트 설명 문구는 `src/data/projects.ts`에서 수동 관리한다.
-- 동기화된 프로젝트 설명은 `src/data/generated-projects.json`에 생성되며, 허브 화면은 이 데이터를 우선 사용한다.
+- 각 프로젝트의 공개 설명, 대표 이미지, 문서 링크는 S3 `portfolio-feed/{projectId}/manifest.json`에서 읽는다.
+- 상태 갱신은 `pnpm sync:all`을 실행한다.
+- 허브 화면은 빌드 시점 더미 데이터가 아니라 S3 `portfolio-feed/index.json`의 프로젝트 목록을 기준으로 표시한다.
 - GitHub Release가 있는 프로젝트는 허브 카드에 릴리즈 링크가 자동 노출된다.
 - 로컬 시연 포트가 겹칠 경우 Maternity Client는 `5175`로 띄운다.

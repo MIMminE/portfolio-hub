@@ -118,7 +118,7 @@ pnpm install
 pnpm dev
 ```
 
-기본 로컬 feed는 `public/portfolio-feed/index.json`을 읽습니다.
+기본 feed는 `/portfolio-feed/index.json`을 읽습니다. 운영에서는 CloudFront가 이 경로를 S3 artifacts bucket으로 라우팅합니다.
 
 ## Feed Build
 
@@ -134,13 +134,7 @@ pnpm feed:index
 PORTFOLIO_FEED_BASE_URL=https://portfolio.example.com/portfolio-feed pnpm feed:index
 ```
 
-로컬 검증용 패키지를 다시 만들 때는 아래 명령을 사용합니다.
-
-```bash
-pnpm sync:packages
-```
-
-GitHub 레포 상태와 프로젝트 manifest를 동기화하려면 아래 명령을 사용합니다.
+GitHub 레포 상태를 동기화하려면 아래 명령을 사용합니다.
 
 ```bash
 pnpm sync:all

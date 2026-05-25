@@ -29,6 +29,7 @@ jobs:
       AWS_REGION_VALUE: ${{ secrets.AWS_REGION }}
       AWS_S3_BUCKET_VALUE: ${{ secrets.AWS_S3_BUCKET }}
       PORTFOLIO_FEED_BUCKET_VALUE: ${{ secrets.PORTFOLIO_FEED_BUCKET }}
+      AWS_CLOUDFRONT_DISTRIBUTION_ID_VALUE: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
 
     steps:
       - name: Checkout
@@ -88,9 +89,9 @@ jobs:
             --cache-control "public,max-age=300"
 
       - name: Invalidate CloudFront
-        if: ${{ env.AWS_ACCESS_KEY_ID_VALUE != '' && env.AWS_SECRET_ACCESS_KEY_VALUE != '' && env.AWS_REGION_VALUE != '' && env.AWS_CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        if: ${{ env.AWS_ACCESS_KEY_ID_VALUE != '' && env.AWS_SECRET_ACCESS_KEY_VALUE != '' && env.AWS_REGION_VALUE != '' && env.AWS_CLOUDFRONT_DISTRIBUTION_ID_VALUE != '' }}
         env:
-          AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+          AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ env.AWS_CLOUDFRONT_DISTRIBUTION_ID_VALUE }}
         run: |
           aws cloudfront create-invalidation \
             --distribution-id "${AWS_CLOUDFRONT_DISTRIBUTION_ID}" \
