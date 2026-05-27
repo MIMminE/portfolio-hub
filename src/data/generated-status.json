@@ -5,20 +5,20 @@
     "htmlUrl": "https://github.com/MIMminE/devpilot",
     "description": null,
     "defaultBranch": "main",
-    "pushedAt": "2026-05-26T15:17:40Z",
-    "updatedAt": "2026-05-26T15:23:48Z",
-    "latestCommitSha": "1b0234493c7e62282b44e4547089e0f46ac28e5a",
-    "latestCommitMessage": "docs: 프로젝트 일감 워크플로우 문서 최신화",
-    "latestReleaseTag": "v0.1.41",
-    "latestReleaseUrl": "https://github.com/MIMminE/devpilot/releases/tag/v0.1.41",
-    "latestReleaseName": "v0.1.41",
+    "pushedAt": "2026-05-26T23:49:04Z",
+    "updatedAt": "2026-05-26T23:48:50Z",
+    "latestCommitSha": "310a0ecc437c162df6db42e70aed0bc75e9ebf35",
+    "latestCommitMessage": "docs: v0.1.42 릴리즈 노트 추가",
+    "latestReleaseTag": "v0.1.42",
+    "latestReleaseUrl": "https://github.com/MIMminE/devpilot/releases/tag/v0.1.42",
+    "latestReleaseName": "v0.1.42",
     "latestReleaseAssetName": "devpilot-macos-menubar-arm64.zip",
-    "latestReleaseAssetUrl": "https://github.com/MIMminE/devpilot/releases/download/v0.1.41/devpilot-macos-menubar-arm64.zip",
-    "latestS3ReleaseAssetUrl": "https://d1fhulbdy8qm0s.cloudfront.net/artifacts/releases/devpilot/v0.1.41/devpilot-macos-menubar-arm64.zip",
+    "latestReleaseAssetUrl": "https://github.com/MIMminE/devpilot/releases/download/v0.1.42/devpilot-macos-menubar-arm64.zip",
+    "latestS3ReleaseAssetUrl": "https://d1fhulbdy8qm0s.cloudfront.net/artifacts/releases/devpilot/v0.1.42/devpilot-macos-menubar-arm64.zip",
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-26T18:48:28.999Z"
+    "syncedAt": "2026-05-27T18:47:01.656Z"
   },
   {
     "id": "warehouse-ops-suite",
@@ -39,7 +39,7 @@
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-26T18:48:29.032Z"
+    "syncedAt": "2026-05-27T18:47:01.689Z"
   },
   {
     "id": "maternity-care-commerce",
@@ -60,7 +60,7 @@
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-26T18:48:29.033Z"
+    "syncedAt": "2026-05-27T18:47:01.690Z"
   },
   {
     "id": "stock-lock-benchmark",
@@ -81,7 +81,7 @@
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-26T18:48:29.034Z"
+    "syncedAt": "2026-05-27T18:47:01.691Z"
   },
   {
     "id": "kotlin-commerce-core",
@@ -102,6 +102,6 @@
     "openIssues": 0,
     "stars": 0,
     "forks": 0,
-    "syncedAt": "2026-05-26T18:48:29.035Z"
+    "syncedAt": "2026-05-27T18:47:01.692Z"
   }
 ]
